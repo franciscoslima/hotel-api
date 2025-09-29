@@ -71,4 +71,6 @@ public class Reserva {
     public void setValorTotal(Double valorTotal) {
         this.valorTotal = valorTotal;
     }
+
+    //fazer getts setts das associações
 }
