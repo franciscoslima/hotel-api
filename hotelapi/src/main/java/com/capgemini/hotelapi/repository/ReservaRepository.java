@@ -1,4 +1,7 @@
 package com.capgemini.hotelapi.repository;
 
-public interface ReservaRepository {
+import com.capgemini.hotelapi.model.Reserva;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ReservaRepository extends JpaRepository<Reserva,Long> {
 }
