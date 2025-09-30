@@ -1,19 +1,15 @@
 package com.capgemini.hotelapi.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class Quarto {
 
     @Id
@@ -27,6 +23,7 @@ public class Quarto {
     private String descricao;
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private QuartoStatusEnum status = QuartoStatusEnum.DISPONIVEL;
 
     private Propriedade propriedade;
