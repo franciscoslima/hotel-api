@@ -1,4 +1,4 @@
-package com.capgemini.hotelapi.exception;
+package com.capgemini.hotelapi.exceptions;
 
 import com.capgemini.hotelapi.model.QuartoStatusEnum;
 

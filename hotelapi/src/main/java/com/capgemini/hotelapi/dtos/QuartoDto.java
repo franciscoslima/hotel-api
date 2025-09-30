@@ -1,4 +1,4 @@
-package com.capgemini.hotelapi.dto;
+package com.capgemini.hotelapi.dtos;
 
 import com.capgemini.hotelapi.model.Propriedade;
 import com.capgemini.hotelapi.model.QuartoStatusEnum;
