@@ -1,6 +1,7 @@
 package com.capgemini.hotelapi.controller;
 
 
+import com.capgemini.hotelapi.dtos.QuartoDto;
 import com.capgemini.hotelapi.model.Quarto;
 import com.capgemini.hotelapi.service.QuartoService;
 import jakarta.validation.Valid;
@@ -33,7 +34,7 @@ public class QuartoController {
     }
 
     @PostMapping("/{id}")
-    public Quarto atualizar(@PathVariable Long id, @RequestBody @Valid Quarto quarto) {
+    public Quarto atualizar(@PathVariable Long id, @RequestBody @Valid QuartoDto quarto) {
         return quartoService.update(quarto, id);
     }
 

@@ -1,5 +1,6 @@
 package com.capgemini.hotelapi.service;
 
+import com.capgemini.hotelapi.dtos.QuartoDto;
 import com.capgemini.hotelapi.model.Quarto;
 import com.capgemini.hotelapi.model.QuartoStatusEnum;
 import com.capgemini.hotelapi.repository.QuartoRepository;
@@ -28,9 +29,13 @@ public class QuartoService {
     public Quarto create(Quarto quarto) {
         return quartoRepository.save(quarto);
     }
-    public Quarto update(Quarto quarto, Long id) {
+    public Quarto update(QuartoDto asd, Long id) {
         this.findById(id);
-        quarto.setId(id);
+
+        Quarto quarto = Quarto.builder()
+            .id(id)
+            .build();
+
         return quartoRepository.save(quarto);
     }
     public void delete(Long id) {

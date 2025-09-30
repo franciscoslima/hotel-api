@@ -27,7 +27,10 @@ public class Quarto {
     private String descricao;
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private QuartoStatusEnum status = QuartoStatusEnum.DISPONIVEL;
 
+    @ManyToOne
+    @JoinColumn(name = "propriedade_id", nullable = false)
     private Propriedade propriedade;
 }
