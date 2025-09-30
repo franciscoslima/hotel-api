@@ -30,33 +30,33 @@ public class ReservaService {
             throw new IllegalArgumentException("Primeiro você escolhe o check-in, depois o check-out");
         }
 
-        // Regra de requisição: calcular valor total automaticamente (exemplo: 200 por dia)
-        long dias = ChronoUnit.DAYS.between(reserva.getCheckIn(), reserva.getCheckOut());
-        double valor = dias * 200.0;
+        //implementar o dto no package apos mergiar na develop (para nao criar duplicado)
+        // Regra de requisição: calcular valor total automaticamente
+        long dias = ChronoUnit.DAYS.between(dto.checkIn(), dto.checkOut());
+        double valor = dias * quarto.getValorDiaria();
         reserva.setValorTotal(valor);
 
         return reservaRepository.save(reserva);
     }
 
-    // Atualizar reserva
     public Reserva update(Long id, Reserva reservaAtualizada) {
         return reservaRepository.findById(id)
                 .map(reserva -> {
                     reserva.setCheckIn(reservaAtualizada.getCheckIn());
                     reserva.setCheckOut(reservaAtualizada.getCheckOut());
-//                    reserva.setQuarto(reservaAtualizada.getQuarto());
-//                    reserva.setHospede(reservaAtualizada.getHospede());
-//                    reserva.setPropriedade(reservaAtualizada.getPropriedade());
+                    reserva.setQuarto(reservaAtualizada.getQuarto());
+                    reserva.setUser(reservaAtualizada.getUser());
+                    reserva.setPropriedade(reservaAtualizada.getPropriedade());
 
                     // para recalcular o valor
-                    long dias = ChronoUnit.DAYS.between(reserva.getCheckIn(), reserva.getCheckOut());
-                    reserva.setValorTotal(dias * 200.0);
+                    long dias = ChronoUnit.DAYS.between(dto.checkIn(), dto.checkOut());
+                    double valor = dias * quarto.getValorDiaria();
+                    reserva.setValorTotal(valor);
 
                     return reservaRepository.save(reserva);
                 }).orElseThrow(() -> new RuntimeException("Reserva não encontrada"));
     }
 
-    // Deletar reserva
     public void delete(Long id) {
         reservaRepository.deleteById(id);
     }

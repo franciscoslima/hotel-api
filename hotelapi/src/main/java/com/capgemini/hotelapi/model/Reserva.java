@@ -1,9 +1,6 @@
 package com.capgemini.hotelapi.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
@@ -12,32 +9,31 @@ public class Reserva {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private LocalDate checkIn;
     private LocalDate checkOut;
     private Double valorTotal;
 
-    //quando tiver implementado na develop
-    // descomenta para fazer o relacioncionamento entre as classes
+    @ManyToOne
+    private Propriedade propriedade;
 
-    //@ManyToOne
-    //private Propriedade propriedade;
+    @ManyToOne
+    private Quarto quarto;
 
-    //@ManyToOne
-    //private Quarto quarto;
-
-    //@ManyToOne
-    //private Usuario usuario;
+    @ManyToOne
+    private User user;
 
     public Reserva() {
     }
 
     //acredito que nao precise passar o id, então removi
-    public Reserva( LocalDate checkIn, LocalDate checkOut, Double valorTotal) {
+    public Reserva(Long id, LocalDate checkIn, LocalDate checkOut, Double valorTotal, Propriedade propriedade, Quarto quarto, User user) {
+        this.id = id;
         this.checkIn = checkIn;
         this.checkOut = checkOut;
         this.valorTotal = valorTotal;
-
+        this.propriedade = propriedade;
+        this.quarto = quarto;
+        this.user = user;
     }
 
     public Long getId() {
@@ -72,5 +68,27 @@ public class Reserva {
         this.valorTotal = valorTotal;
     }
 
-    //fazer getts setts das associações
+    public Propriedade getPropriedade() {
+        return propriedade;
+    }
+
+    public void setPropriedade(Propriedade propriedade) {
+        this.propriedade = propriedade;
+    }
+
+    public Quarto getQuarto() {
+        return quarto;
+    }
+
+    public void setQuarto(Quarto quarto) {
+        this.quarto = quarto;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }
