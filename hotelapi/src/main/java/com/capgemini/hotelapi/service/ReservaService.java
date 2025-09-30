@@ -16,15 +16,15 @@ public class ReservaService {
         this.reservaRepository = reservaRepository;
     }
 
-    public List<Reserva> listarTodas() {
+    public List<Reserva> findAll() {
         return reservaRepository.findAll();
     }
 
-    public Optional<Reserva> buscarPorId(Long id) {
+    public Optional<Reserva> findById(Long id) {
         return reservaRepository.findById(id);
     }
 
-    public Reserva criarReserva(Reserva reserva) {
+    public Reserva create(Reserva reserva) {
         // Regra de requisição: onde não pode check-out antes do check-in
         if (reserva.getCheckOut().isBefore(reserva.getCheckIn())) {
             throw new IllegalArgumentException("Primeiro você escolhe o check-in, depois o check-out");
@@ -39,7 +39,7 @@ public class ReservaService {
     }
 
     // Atualizar reserva
-    public Reserva atualizarReserva(Long id, Reserva reservaAtualizada) {
+    public Reserva update(Long id, Reserva reservaAtualizada) {
         return reservaRepository.findById(id)
                 .map(reserva -> {
                     reserva.setCheckIn(reservaAtualizada.getCheckIn());
@@ -57,7 +57,7 @@ public class ReservaService {
     }
 
     // Deletar reserva
-    public void deletar(Long id) {
+    public void delete(Long id) {
         reservaRepository.deleteById(id);
     }
 }

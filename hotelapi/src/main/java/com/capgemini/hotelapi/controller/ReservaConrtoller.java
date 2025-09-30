@@ -16,31 +16,31 @@ public class ReservaConrtoller {
         this.reservaService = reservaService;
     }
 
-    @GetMapping("/listarreservas")
-    public List<Reserva> listarTodas() {
-        return reservaService.listarTodas();
+    @GetMapping("/buscarreservas")
+    public List<Reserva> findAll() {
+        return reservaService.findAll();
     }
 
     // seria interessante gerar um codigo da reserva para buscar por ele ?
-    @GetMapping("/buscarporreserva/{id}")
-    public Reserva buscarPorId(@PathVariable Long id) {
-        return reservaService.buscarPorId(id)
+    @GetMapping("/{id}")
+    public Reserva findById(@PathVariable Long id) {
+        return reservaService.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva não encontrada"));
     }
 
-    @PostMapping("/fazerreserva")
-    public Reserva fazerReserva(@RequestBody Reserva reserva) {
-        return reservaService.criarReserva(reserva);
+    @PostMapping("/criarreservar")
+    public Reserva create(@RequestBody Reserva reserva) {
+        return reservaService.create(reserva);
     }
 
-    @PutMapping("/refazerreserva/{id}")
-    public Reserva atualizar(@PathVariable Long id, @RequestBody Reserva reserva) {
-        return reservaService.atualizarReserva(id, reserva);
+    @PutMapping("/atualizarreserva/{id}")
+    public Reserva update(@PathVariable Long id, @RequestBody Reserva reserva) {
+        return reservaService.update(id, reserva);
     }
 
-    @DeleteMapping("/{id}")
-    public void deletar(@PathVariable Long id) {
-        reservaService.deletar(id);
+    @DeleteMapping("/deletarreserva/{id}")
+    public void delete(@PathVariable Long id) {
+        reservaService.delete(id);
     }
 
 }
