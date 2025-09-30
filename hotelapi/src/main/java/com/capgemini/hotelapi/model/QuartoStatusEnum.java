@@ -5,8 +5,8 @@ public enum QuartoStatusEnum {
     RESERVADO("","Alguém fez uma reserva, mas ainda não está hospedado."),
     OCUPADO("","O hóspede está atualmente no quarto."),
     MANUTENCAO("","O quarto está indisponível por manutenção ou limpeza."),
-    INDISPONIVEL("","O quarto está fora de operação por tempo indeterminado."),
-    CHECKOUT_PENDENTE("","O hóspede já saiu, mas o quarto ainda não foi liberado para nova reserva.");
+    INDISPONIVEL("","O quarto está fora de operação por tempo indeterminado.");
+
     private final String nome;
     private final String descricao;
 

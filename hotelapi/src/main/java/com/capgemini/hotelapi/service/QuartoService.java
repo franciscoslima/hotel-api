@@ -49,8 +49,51 @@ public class QuartoService {
         return quartoRepository.save(quarto);
     }
 
+    public Quarto checkin(Long id){
+        Quarto quarto = this.findById(id);
 
+        //Só pode fazer check-in em quartos com status RESERVADO
+        if (quarto.getStatus() != QuartoStatusEnum.RESERVADO) {
+            throw new RuntimeException("Este quarto não possui reservas.");
+        }
 
+        quarto.setStatus(QuartoStatusEnum.OCUPADO);
+        return quartoRepository.save(quarto);
+    }
 
+    public Quarto checkout(Long id){
+        Quarto quarto = this.findById(id);
 
+        //Só pode fazer check-out de quartos com status OCUPADO
+        if (quarto.getStatus() != QuartoStatusEnum.OCUPADO) {
+            throw new RuntimeException("Operação inválida.");
+        }
+
+        quarto.setStatus(QuartoStatusEnum.MANUTENCAO);
+        return quartoRepository.save(quarto);
+    }
+
+    public Quarto manutencao(Long id){
+        Quarto quarto = this.findById(id);
+
+        //Só pode fazer check-out de quartos com status OCUPADO
+        if (quarto.getStatus() != QuartoStatusEnum.MANUTENCAO) {
+            throw new RuntimeException("Operação inválida.");
+        }
+
+        quarto.setStatus(QuartoStatusEnum.MANUTENCAO);
+        return quartoRepository.save(quarto);
+    }
+
+    public Quarto cancelarResereva(Long id){
+        Quarto quarto = this.findById(id);
+
+        //Só pode fazer check-out de quartos com status OCUPADO
+        if (quarto.getStatus() != QuartoStatusEnum.RESERVADO) {
+            throw new RuntimeException("Quarto não está ocupado.");
+        }
+
+        quarto.setStatus(QuartoStatusEnum.DISPONIVEL);
+        return quartoRepository.save(quarto);
+    }
 }
