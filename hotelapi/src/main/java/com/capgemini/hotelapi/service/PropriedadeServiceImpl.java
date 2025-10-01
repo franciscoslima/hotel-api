@@ -1,10 +1,10 @@
 package com.capgemini.hotelapi.service;
 
-import com.capgemini.hotelapi.dtos.EnderecoResponseDTO;
 import com.capgemini.hotelapi.dtos.PropriedadeRequestDTO;
 import com.capgemini.hotelapi.dtos.PropriedadeResponseDTO;
 
-import com.capgemini.hotelapi.model.Endereco;
+import com.capgemini.hotelapi.exceptions.ResourceNotFoundException;
+import com.capgemini.hotelapi.mapper.PropriedadeMapper;
 import com.capgemini.hotelapi.model.Propriedade;
 import com.capgemini.hotelapi.repository.PropriedadeRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,78 +21,40 @@ import java.util.List;
 public class PropriedadeServiceImpl implements PropriedadeService {
 
     private final PropriedadeRepository propriedadeRepository;
+    private final PropriedadeMapper mapper; // Injetado
 
-    private Propriedade toEntity(PropriedadeRequestDTO dto) {
-        Propriedade propriedade = new Propriedade();
-        propriedade.setNome(dto.nome());
-        propriedade.setDescricao(dto.descricao());
-        propriedade.setTipo(dto.tipo());
-
-        if (dto.endereco() != null) {
-            Endereco endereco = new Endereco(
-                    dto.endereco().rua(),
-                    dto.endereco().bairro(),
-                    dto.endereco().cidade(),
-                    dto.endereco().estado()
-            );
-            propriedade.setEndereco(endereco);
-        }
-
-//        if (dto.getQuartos() != null) {
-//            List<Quarto> quartos = dto.getQuartos().stream()
-//                    .map(quartoDto -> new Quarto(null, propriedade, quartoDto.getNumeracao(), quartoDto.getDescricao(), quartoDto.getStatus()))
-//                    .collect(Collectors.toList());
-//
-//            quartos.forEach(propriedade::adicionarQuarto);
-//        }
-
-        return propriedade;
-    }
-
-    private PropriedadeResponseDTO fromEntity(Propriedade propriedade) {
-        if (propriedade == null) {
-            return null;
-        }
-        return new PropriedadeResponseDTO(
-                propriedade.getId(),
-                propriedade.getNome(),
-                propriedade.getDescricao(),
-                propriedade.getTipo(),
-                propriedade.getEndereco() != null ? new EnderecoResponseDTO(
-                        propriedade.getEndereco().getRua(),
-                        propriedade.getEndereco().getBairro(),
-                        propriedade.getEndereco().getCidade(),
-                        propriedade.getEndereco().getEstado()
-                ) : null
-        );
-    }
-
-
+    @Override
     @Transactional(readOnly = true)
-    public List<Propriedade> listarTodas() {
+    public List<PropriedadeResponseDTO> getAllPropriedades() {
         log.info("Listando todas as propriedades");
-        return propriedadeRepository.findAllByOrderByNomeAsc();
+        return propriedadeRepository.findAllByOrderByNomeAsc().stream()
+                .map(mapper::toResponseDTO)
+                .toList();
     }
 
+    @Override
     @Transactional(readOnly = true)
-    public Propriedade buscarPorId(Long id) {
+    public PropriedadeResponseDTO getPropriedadeById(Long id) {
         log.info("Buscando propriedade por ID: {}", id);
-        return propriedadeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Propriedade não encontrada com ID: " + id));
+        Propriedade propriedade = propriedadeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Propriedade", id));
+        return mapper.toResponseDTO(propriedade);
     }
 
-    public Propriedade criar(PropriedadeRequestDTO dto) {
+    @Override
+    public PropriedadeResponseDTO createPropriedade(PropriedadeRequestDTO dto) {
         log.info("Criando nova propriedade: {}", dto.nome());
-        Propriedade novaPropriedade = toEntity(dto);
+        Propriedade novaPropriedade = mapper.toEntity(dto);
         Propriedade savedPropriedade = propriedadeRepository.save(novaPropriedade);
         log.info("Propriedade criada com sucesso. ID: {}", savedPropriedade.getId());
-        return savedPropriedade;
+        return mapper.toResponseDTO(savedPropriedade);
     }
 
-    public Propriedade atualizar(Long id, PropriedadeRequestDTO dto) {
+    @Override
+    public PropriedadeResponseDTO updatePropriedade(Long id, PropriedadeRequestDTO dto) {
         log.info("Atualizando propriedade ID: {}", id);
         Propriedade propriedade = propriedadeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Propriedade não encontrada com ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Propriedade", id));
 
         propriedade.setNome(dto.nome());
         propriedade.setDescricao(dto.descricao());
@@ -105,17 +67,17 @@ public class PropriedadeServiceImpl implements PropriedadeService {
             propriedade.getEndereco().setEstado(dto.endereco().estado());
         }
 
-        log.info("Propriedade atualizada com sucesso. ID: {}", propriedade.getId());
-        return propriedade;
+        log.info("Propriedade atualizada com sucesso. ID: {}", id);
+        return mapper.toResponseDTO(propriedade);
     }
 
-    public void deletar(Long id) {
+    @Override
+    public void deletePropriedade(Long id) {
         log.info("Deletando propriedade ID: {}", id);
         if (!propriedadeRepository.existsById(id)) {
-            throw new RuntimeException("Propriedade não encontrada com ID: " + id);
+            throw new ResourceNotFoundException("Propriedade", id);
         }
         propriedadeRepository.deleteById(id);
         log.info("Propriedade deletada com sucesso. ID: {}", id);
     }
-
 }

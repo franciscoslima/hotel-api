@@ -1,8 +1,12 @@
 package com.capgemini.hotelapi.service;
 
-import com.capgemini.hotelapi.exceptions.InvalidRoomStatusException;
+import com.capgemini.hotelapi.dtos.QuartoRequestDTO;
+import com.capgemini.hotelapi.dtos.QuartoResponseDTO;
+import com.capgemini.hotelapi.exceptions.ResourceNotFoundException;
+import com.capgemini.hotelapi.mapper.QuartoMapper;
+import com.capgemini.hotelapi.model.Propriedade;
 import com.capgemini.hotelapi.model.Quarto;
-import com.capgemini.hotelapi.model.QuartoStatus;
+import com.capgemini.hotelapi.repository.PropriedadeRepository;
 import com.capgemini.hotelapi.repository.QuartoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,113 +22,67 @@ import java.util.List;
 public class QuartoServiceImpl implements QuartoService {
 
     private final QuartoRepository quartoRepository;
+    private final PropriedadeRepository propriedadeRepository; // Injetado diretamente
+    private final QuartoMapper mapper;
 
+    @Override
     @Transactional(readOnly = true)
-    public List<Quarto> getAll() {
+    public List<QuartoResponseDTO> getAll() {
         log.info("Listando todos os quartos");
-        return quartoRepository.findAll();
+        return quartoRepository.findAll().stream()
+                .map(mapper::toResponseDTO)
+                .toList();
     }
 
+    @Override
     @Transactional(readOnly = true)
-    public Quarto findById(Long id) {
+    public QuartoResponseDTO findById(Long id) {
         log.info("Buscando quarto por ID: {}", id);
-        return quartoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Quarto não encontrado com ID: " + id));
+        Quarto quarto = quartoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Quarto", id));
+        return mapper.toResponseDTO(quarto);
     }
 
-    public Quarto create(Quarto quarto) {
-        log.info("Criando novo quarto");
-        Quarto savedQuarto = quartoRepository.save(quarto);
+    @Override
+    public QuartoResponseDTO create(QuartoRequestDTO dto) {
+        log.info("Criando novo quarto para Propriedade ID: {}", dto.propriedadeId());
+
+        Propriedade propriedade = propriedadeRepository.findById(dto.propriedadeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Propriedade", dto.propriedadeId()));
+
+        Quarto quartoToSave = mapper.toEntity(dto);
+
+        propriedade.adicionarQuarto(quartoToSave);
+
+        Quarto savedQuarto = quartoRepository.save(quartoToSave);
+
         log.info("Quarto criado com sucesso. ID: {}", savedQuarto.getId());
-        return savedQuarto;
+        return mapper.toResponseDTO(savedQuarto);
     }
 
-    public Quarto update(Quarto quarto, Long id) {
+    @Override
+    public QuartoResponseDTO update(Long id, QuartoRequestDTO dto) {
         log.info("Atualizando quarto ID: {}", id);
-        Quarto existingQuarto = this.findById(id);
-        quarto.setId(id);
-        Quarto updatedQuarto = quartoRepository.save(quarto);
+        Quarto existingQuarto = quartoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Quarto", id));
+
+        existingQuarto.setNumeracao(dto.numeracao());
+        existingQuarto.setDescricao(dto.descricao());
+        existingQuarto.setStatus(dto.status());
+        existingQuarto.setValorDiaria(dto.valorDiaria());
+
+        Quarto updatedQuarto = quartoRepository.save(existingQuarto);
         log.info("Quarto atualizado com sucesso. ID: {}", updatedQuarto.getId());
-        return updatedQuarto;
+        return mapper.toResponseDTO(updatedQuarto);
     }
 
+    @Override
     public void delete(Long id) {
         log.info("Deletando quarto ID: {}", id);
-
-        //verifica se quarto existe
-        this.findById(id);
-
+        if (!quartoRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Quarto", id);
+        }
         quartoRepository.deleteById(id);
         log.info("Quarto deletado com sucesso. ID: {}", id);
-    }
-
-    public Quarto reservarQuarto(Long id) {
-        log.info("Reservando quarto ID: {}", id);
-        Quarto quarto = this.findById(id);
-
-        if (quarto.getStatus() != QuartoStatus.DISPONIVEL) {
-            throw new InvalidRoomStatusException("Quarto não está disponível para reserva.");
-        }
-
-        quarto.setStatus(QuartoStatus.RESERVADO);
-        Quarto quartoReservado = quartoRepository.save(quarto);
-        log.info("Quarto reservado com sucesso. ID: {}", quartoReservado.getId());
-        return quartoReservado;
-    }
-
-    public Quarto checkin(Long id) {
-        log.info("Realizando check-in do quarto ID: {}", id);
-        Quarto quarto = this.findById(id);
-
-        if (quarto.getStatus() != QuartoStatus.RESERVADO) {
-            throw new InvalidRoomStatusException("Este quarto não possui reservas.");
-        }
-
-        quarto.setStatus(QuartoStatus.OCUPADO);
-        Quarto quartoOcupado = quartoRepository.save(quarto);
-        log.info("Check-in realizado com sucesso. ID: {}", quartoOcupado.getId());
-        return quartoOcupado;
-    }
-
-    public Quarto checkout(Long id) {
-        log.info("Realizando check-out do quarto ID: {}", id);
-        Quarto quarto = this.findById(id);
-
-        if (quarto.getStatus() != QuartoStatus.OCUPADO) {
-            throw new InvalidRoomStatusException("Operação inválida.");
-        }
-
-        quarto.setStatus(QuartoStatus.MANUTENCAO);
-        Quarto quartoManutencao = quartoRepository.save(quarto);
-        log.info("Check-out realizado com sucesso. ID: {}", quartoManutencao.getId());
-        return quartoManutencao;
-    }
-
-    public Quarto manutencao(Long id) {
-        log.info("Marcando quarto para manutenção ID: {}", id);
-        Quarto quarto = this.findById(id);
-
-        if (quarto.getStatus() == QuartoStatus.OCUPADO || quarto.getStatus() == QuartoStatus.RESERVADO) {
-            throw new InvalidRoomStatusException("Operação inválida. Quarto está ocupado ou reservado.");
-        }
-
-        quarto.setStatus(QuartoStatus.MANUTENCAO);
-        Quarto quartoManutencao = quartoRepository.save(quarto);
-        log.info("Quarto marcado para manutenção com sucesso. ID: {}", quartoManutencao.getId());
-        return quartoManutencao;
-    }
-
-    public Quarto cancelarResereva(Long id) {
-        log.info("Cancelando reserva do quarto ID: {}", id);
-        Quarto quarto = this.findById(id);
-
-        if (quarto.getStatus() != QuartoStatus.RESERVADO) {
-            throw new InvalidRoomStatusException("Quarto não está reservado.");
-        }
-
-        quarto.setStatus(QuartoStatus.DISPONIVEL);
-        Quarto quartoDisponivel = quartoRepository.save(quarto);
-        log.info("Reserva cancelada com sucesso. ID: {}", quartoDisponivel.getId());
-        return quartoDisponivel;
     }
 }
