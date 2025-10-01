@@ -33,4 +33,6 @@ public class Quarto {
     @ManyToOne
     @JoinColumn(name = "propriedade_id", nullable = false)
     private Propriedade propriedade;
+
+    private Double valorDiaria;
 }
