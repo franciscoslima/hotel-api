@@ -7,9 +7,18 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record QuartoRequestDTO(
-        @NotNull int numeracao,
-        @NotBlank @Size(max = 120) String descricao,
-        @NotNull Long propriedadeId,
-        @NotNull Double valorDiaria,
-        @NotNull QuartoStatus status
+        @Schema(description = "Numeração do quarto", example = "101")
+        @NotBlank(message = "Numeração é obrigatória") int numeracao,
+
+        @Schema(description = "Descrição do Quarto", example = "Quarto com vista para o mar")
+        @NotBlank(message = "Descrição é obrigatória") String descricao,
+
+        @Schema(description = "Valor da diária", example = "500")
+        @NotBlank(message = "Valor da diária é obrigatória") Double valorDiaria,
+
+        @Schema(description = "Propriedade do quarto", example = "1")
+        @NotBlank(message = "Propriedade é obrigatória") Long propriedadeId,
+
+        @Schema(description = "Status do quarto", example = "OCUPADO")
+        QuartoStatus status
 ) {}

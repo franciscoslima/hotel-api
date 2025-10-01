@@ -1,6 +1,7 @@
 package com.capgemini.hotelapi.service;
 
 
+import java.time.LocalDate;
 import java.util.List;
 
 import com.capgemini.hotelapi.dtos.QuartoRequestDTO;
@@ -13,4 +14,5 @@ public interface QuartoService {
     QuartoResponseDTO findById(Long id);
     QuartoResponseDTO update(Long id, QuartoRequestDTO dto);
     void delete(Long id);
+    List<QuartoResponseDTO> findDisponiveis(LocalDate checkIn, LocalDate checkOut);
 }
