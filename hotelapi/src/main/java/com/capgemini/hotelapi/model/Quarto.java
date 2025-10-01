@@ -6,11 +6,13 @@ import lombok.*;
 import java.util.List;
 
 @Entity
-@Table(name = "quartos")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "propriedade") // Exclui a Propriedade
+@Table(name = "quartos")
 public class Quarto {
 
     @Id

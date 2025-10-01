@@ -5,26 +5,12 @@ import java.util.List;
 
 import com.capgemini.hotelapi.dtos.QuartoRequestDTO;
 import com.capgemini.hotelapi.dtos.QuartoResponseDTO;
+import com.capgemini.hotelapi.model.Quarto;
 
 public interface QuartoService {
-
+    QuartoResponseDTO create(QuartoRequestDTO dto);
     List<QuartoResponseDTO> getAll();
-
     QuartoResponseDTO findById(Long id);
-
-    QuartoResponseDTO create(QuartoRequestDTO quarto);
-
-    QuartoResponseDTO update(QuartoRequestDTO quarto, Long id);
-
+    QuartoResponseDTO update(Long id, QuartoRequestDTO dto);
     void delete(Long id);
-
-    QuartoResponseDTO reservarQuarto(Long id);
-
-    QuartoResponseDTO checkin(Long id);
-
-    QuartoResponseDTO checkout(Long id);
-
-    QuartoResponseDTO manutencao(Long id);
-
-    QuartoResponseDTO cancelarResereva(Long id);
 }
