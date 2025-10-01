@@ -26,5 +26,9 @@ public class Quarto {
     @Builder.Default
     private QuartoStatusEnum status = QuartoStatusEnum.DISPONIVEL;
 
+    @ManyToOne
+    @JoinColumn(name = "propriedade_id", nullable = false)
     private Propriedade propriedade;
+
+    private Double valorDiaria;
 }

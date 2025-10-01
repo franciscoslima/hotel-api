@@ -9,7 +9,6 @@ public class QuartoDto {
 
     private Long id;
 
-
     private int numeracao;
 
     @NotBlank(message = "Nome é obrigatório")
