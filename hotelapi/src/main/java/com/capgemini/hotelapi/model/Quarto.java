@@ -29,4 +29,6 @@ public class Quarto {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "propriedade_id", nullable = false)
     private Propriedade propriedade;
+
+    private Double valorDiaria;
 }
