@@ -9,6 +9,4 @@ public record ReservaUpdateDTO(
         LocalDate checkIn,
         @NotNull
         LocalDate checkOut
-
-        //Long quartoId se quiser passar o Long (que seria o numero da estadia)
 ) {}
