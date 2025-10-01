@@ -8,6 +8,5 @@ public record QuartoResponseDTO(
         String descricao,
         Double valorDiaria,
         QuartoStatus status,
-        String propriedade
-) {
-}
+        String nomePropriedade
+) {}

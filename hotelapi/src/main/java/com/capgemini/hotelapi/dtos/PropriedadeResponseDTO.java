@@ -5,7 +5,7 @@ import com.capgemini.hotelapi.model.TipoPropriedade;
 import java.util.List;
 
 public record PropriedadeResponseDTO(
-        long id,
+        Long id,
         String nome,
         String descricao,
         TipoPropriedade tipo,

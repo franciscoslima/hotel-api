@@ -1,5 +1,6 @@
 package com.capgemini.hotelapi.dtos;
 
+import com.capgemini.hotelapi.model.Endereco;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
@@ -12,4 +13,8 @@ public record EnderecoRequestDTO(
         @NotBlank(message = "Cidade é obrigatória") String cidade,
         @Schema(description = "Nome do estado", example = "RJ")
         @NotBlank(message = "Estado é obrigatório") String estado
-) {}
+) {
+        public Endereco toEntity() {
+                return new Endereco(rua, bairro, cidade, estado);
+        }
+}

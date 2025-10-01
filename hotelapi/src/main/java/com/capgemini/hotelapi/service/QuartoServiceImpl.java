@@ -1,11 +1,12 @@
 package com.capgemini.hotelapi.service;
 
-import com.capgemini.hotelapi.dtos.PropriedadeResponseDTO;
 import com.capgemini.hotelapi.dtos.QuartoRequestDTO;
 import com.capgemini.hotelapi.dtos.QuartoResponseDTO;
-import com.capgemini.hotelapi.exceptions.InvalidRoomStatusException;
+import com.capgemini.hotelapi.exceptions.ResourceNotFoundException;
+import com.capgemini.hotelapi.mapper.QuartoMapper;
+import com.capgemini.hotelapi.model.Propriedade;
 import com.capgemini.hotelapi.model.Quarto;
-import com.capgemini.hotelapi.model.QuartoStatus;
+import com.capgemini.hotelapi.repository.PropriedadeRepository;
 import com.capgemini.hotelapi.repository.QuartoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,78 +22,67 @@ import java.util.Optional;
 public class QuartoServiceImpl implements QuartoService {
 
     private final QuartoRepository quartoRepository;
-    private final PropriedadeService propriedadeService;
+    private final PropriedadeRepository propriedadeRepository; // Injetado diretamente
+    private final QuartoMapper mapper;
 
+    @Override
     @Transactional(readOnly = true)
     public List<QuartoResponseDTO> getAll() {
         log.info("Listando todos os quartos");
-        return quartoRepository.findAll().stream().map(this::fromEntity).toList();
+        return quartoRepository.findAll().stream()
+                .map(mapper::toResponseDTO)
+                .toList();
     }
 
+    @Override
     @Transactional(readOnly = true)
     public QuartoResponseDTO findById(Long id) {
         log.info("Buscando quarto por ID: {}", id);
-        return quartoRepository.findById(id).map(this::fromEntity)
-                .orElseThrow(() -> new RuntimeException("Quarto não encontrado com ID: " + id));
+        Quarto quarto = quartoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Quarto", id));
+        return mapper.toResponseDTO(quarto);
     }
 
-    public QuartoResponseDTO create(QuartoRequestDTO quarto) {
-        PropriedadeResponseDTO propriedade = propriedadeService.getPropriedadeById(quarto.propriedadeId());
-        log.info("Criando novo quarto");
+    @Override
+    public QuartoResponseDTO create(QuartoRequestDTO dto) {
+        log.info("Criando novo quarto para Propriedade ID: {}", dto.propriedadeId());
 
-        Quarto quartoToSave = toEntity(quarto);
-        quartoToSave.setPropriedade(propriedadeService.fromResponseDTO(propriedade));
+        Propriedade propriedade = propriedadeRepository.findById(dto.propriedadeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Propriedade", dto.propriedadeId()));
+
+        Quarto quartoToSave = mapper.toEntity(dto);
+
+        propriedade.adicionarQuarto(quartoToSave);
 
         Quarto savedQuarto = quartoRepository.save(quartoToSave);
+
         log.info("Quarto criado com sucesso. ID: {}", savedQuarto.getId());
-        return fromEntity(savedQuarto);
+        return mapper.toResponseDTO(savedQuarto);
     }
 
-    public QuartoResponseDTO update(QuartoRequestDTO quarto, Long id) {
+    @Override
+    public QuartoResponseDTO update(Long id, QuartoRequestDTO dto) {
         log.info("Atualizando quarto ID: {}", id);
-        Optional<Quarto> existingQuarto = quartoRepository.findById(id);
+        Quarto existingQuarto = quartoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Quarto", id));
 
-        if (existingQuarto.isEmpty()) {
-            throw new RuntimeException("Quarto não encontrado com ID: " + id);
-        }
-        existingQuarto.get().setNumeracao(quarto.numeracao());
-        existingQuarto.get().setDescricao(quarto.descricao());
-        existingQuarto.get().setStatus(quarto.status());
-        existingQuarto.get().setValorDiaria(quarto.valorDiaria());
+        existingQuarto.setNumeracao(dto.numeracao());
+        existingQuarto.setDescricao(dto.descricao());
+        existingQuarto.setStatus(dto.status());
+        existingQuarto.setValorDiaria(dto.valorDiaria());
 
-        Quarto updatedQuarto = quartoRepository.save(existingQuarto.get());
+        Quarto updatedQuarto = quartoRepository.save(existingQuarto);
         log.info("Quarto atualizado com sucesso. ID: {}", updatedQuarto.getId());
-        return fromEntity(updatedQuarto);
+        return mapper.toResponseDTO(updatedQuarto);
     }
 
+    @Override
     public void delete(Long id) {
         log.info("Deletando quarto ID: {}", id);
-
-        this.findById(id);
-
+        if (!quartoRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Quarto", id);
+        }
         quartoRepository.deleteById(id);
         log.info("Quarto deletado com sucesso. ID: {}", id);
-    }
-
-    public QuartoResponseDTO fromEntity(Quarto quarto) {
-        return new QuartoResponseDTO(
-                quarto.getId(),
-                quarto.getNumeracao(),
-                quarto.getDescricao(),
-                quarto.getValorDiaria(),
-                quarto.getStatus(),
-                quarto.getPropriedade().getNome()
-        );
-    }
-
-    public Quarto toEntity(QuartoRequestDTO dto) {
-        return new Quarto(
-                null,
-                dto.numeracao(),
-                dto.descricao(),
-                dto.status(),
-                null,
-                dto.valorDiaria()
-        );
     }
 }

@@ -26,69 +26,41 @@ import java.util.List;
 @Tag(name = "Propriedades", description = "API para gerenciamento de propriedades")
 public class PropriedadeController {
 
-    @Autowired
-    private PropriedadeService propriedadeService;
+    private final PropriedadeService propriedadeService;
 
-    @Operation(summary = "Criar nova propriedade", description = "Cria uma nova propriedade no sistema")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Propriedade criada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos")
-    })
+    @Operation(summary = "Criar nova propriedade")
     @PostMapping
     public ResponseEntity<PropriedadeResponseDTO> createPropriedade(@Valid @RequestBody PropriedadeRequestDTO request) {
-        log.info("Recebida requisição para criar nova propriedade: {}", request.nome());
         PropriedadeResponseDTO novaPropriedade = propriedadeService.createPropriedade(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(novaPropriedade);
     }
 
-    @Operation(summary = "Listar todas as propriedades", description = "Lista todas as propriedades ordenadas por nome")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista de propriedades retornada com sucesso")
-    })
+    @Operation(summary = "Listar todas as propriedades")
     @GetMapping
     public ResponseEntity<List<PropriedadeResponseDTO>> getAllPropriedades() {
-        log.info("Recebida requisição para listar todas as propriedades");
         List<PropriedadeResponseDTO> propriedades = propriedadeService.getAllPropriedades();
         return ResponseEntity.ok(propriedades);
     }
 
-    @Operation(summary = "Buscar propriedade por ID", description = "Busca uma propriedade específica pelo ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Propriedade encontrada"),
-            @ApiResponse(responseCode = "404", description = "Propriedade não encontrada")
-    })
+    @Operation(summary = "Buscar propriedade por ID")
     @GetMapping("/{id}")
-    public ResponseEntity<PropriedadeResponseDTO> getPropriedadeById(
-            @Parameter(description = "ID da propriedade") @PathVariable Long id) {
-        log.info("Recebida requisição para buscar propriedade com ID: {}", id);
+    public ResponseEntity<PropriedadeResponseDTO> getPropriedadeById(@PathVariable Long id) {
         PropriedadeResponseDTO propriedade = propriedadeService.getPropriedadeById(id);
         return ResponseEntity.ok(propriedade);
     }
 
-    @Operation(summary = "Atualizar propriedade", description = "Atualiza os dados de uma propriedade existente")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Propriedade atualizada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
-            @ApiResponse(responseCode = "404", description = "Propriedade não encontrada")
-    })
+    @Operation(summary = "Atualizar propriedade")
     @PutMapping("/{id}")
     public ResponseEntity<PropriedadeResponseDTO> updatePropriedade(
-            @Parameter(description = "ID da propriedade") @PathVariable Long id,
+            @PathVariable Long id,
             @Valid @RequestBody PropriedadeRequestDTO request) {
-        log.info("Recebida requisição para atualizar propriedade com ID: {}", id);
         PropriedadeResponseDTO propriedadeAtualizada = propriedadeService.updatePropriedade(id, request);
         return ResponseEntity.ok(propriedadeAtualizada);
     }
 
-    @Operation(summary = "Deletar propriedade", description = "Remove uma propriedade do sistema")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Propriedade deletada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Propriedade não encontrada")
-    })
+    @Operation(summary = "Deletar propriedade")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePropriedade(
-            @Parameter(description = "ID da propriedade") @PathVariable Long id) {
-        log.info("Recebida requisição para deletar propriedade com ID: {}", id);
+    public ResponseEntity<Void> deletePropriedade(@PathVariable Long id) {
         propriedadeService.deletePropriedade(id);
         return ResponseEntity.noContent().build();
     }

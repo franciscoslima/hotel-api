@@ -4,12 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
+@ToString(exclude = "propriedade") // Exclui a Propriedade
+@Table(name = "quartos")
 public class Quarto {
 
     @Id
