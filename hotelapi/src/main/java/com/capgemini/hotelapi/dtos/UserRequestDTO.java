@@ -1,4 +1,4 @@
-package com.capgemini.hotelapi.dto;
+package com.capgemini.hotelapi.dtos;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

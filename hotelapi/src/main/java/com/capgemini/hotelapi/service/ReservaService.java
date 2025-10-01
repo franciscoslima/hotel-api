@@ -1,14 +1,11 @@
 package com.capgemini.hotelapi.service;
 
-import com.capgemini.hotelapi.model.Reserva;
-import com.capgemini.hotelapi.repository.ReservaRepository;
-import org.springframework.stereotype.Service;
+import com.capgemini.hotelapi.dtos.ReservaRequestDTO;
+import com.capgemini.hotelapi.dtos.ReservaResponseDTO;
+import com.capgemini.hotelapi.dtos.ReservaUpdateDTO;
 
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 
-@Service
 public interface ReservaService {
 
         ReservaResponseDTO create(ReservaRequestDTO dto);

@@ -1,4 +1,4 @@
-package com.capgemini.hotelapi.service;
+package com.capgemini.hotelapi.dtos;
 
 import jakarta.validation.constraints.NotNull;
 

@@ -3,25 +3,24 @@ package com.capgemini.hotelapi.service;
 import com.capgemini.hotelapi.dtos.EnderecoResponseDTO;
 import com.capgemini.hotelapi.dtos.PropriedadeRequestDTO;
 import com.capgemini.hotelapi.dtos.PropriedadeResponseDTO;
-import com.capgemini.hotelapi.exceptions.ResourceNotFoundException;
+
 import com.capgemini.hotelapi.model.Endereco;
 import com.capgemini.hotelapi.model.Propriedade;
 import com.capgemini.hotelapi.repository.PropriedadeRepository;
-import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
+@Transactional
 public class PropriedadeServiceImpl implements PropriedadeService {
 
     private final PropriedadeRepository propriedadeRepository;
-
-    public PropriedadeServiceImpl(PropriedadeRepository propriedadeRepository) {
-        this.propriedadeRepository = propriedadeRepository;
-    }
-
-    private static final String NOT_FOUND_MSG = "Propriedade não encontrada com o ID: ";
 
     private Propriedade toEntity(PropriedadeRequestDTO dto) {
         Propriedade propriedade = new Propriedade();
@@ -69,24 +68,31 @@ public class PropriedadeServiceImpl implements PropriedadeService {
     }
 
 
+    @Transactional(readOnly = true)
     public List<Propriedade> listarTodas() {
+        log.info("Listando todas as propriedades");
         return propriedadeRepository.findAllByOrderByNomeAsc();
     }
 
+    @Transactional(readOnly = true)
     public Propriedade buscarPorId(Long id) {
+        log.info("Buscando propriedade por ID: {}", id);
         return propriedadeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND_MSG + id));
+                .orElseThrow(() -> new RuntimeException("Propriedade não encontrada com ID: " + id));
     }
 
     public Propriedade criar(PropriedadeRequestDTO dto) {
+        log.info("Criando nova propriedade: {}", dto.nome());
         Propriedade novaPropriedade = toEntity(dto);
-        return propriedadeRepository.save(novaPropriedade);
+        Propriedade savedPropriedade = propriedadeRepository.save(novaPropriedade);
+        log.info("Propriedade criada com sucesso. ID: {}", savedPropriedade.getId());
+        return savedPropriedade;
     }
 
-    @Transactional
     public Propriedade atualizar(Long id, PropriedadeRequestDTO dto) {
+        log.info("Atualizando propriedade ID: {}", id);
         Propriedade propriedade = propriedadeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND_MSG + id));
+                .orElseThrow(() -> new RuntimeException("Propriedade não encontrada com ID: " + id));
 
         propriedade.setNome(dto.nome());
         propriedade.setDescricao(dto.descricao());
@@ -99,15 +105,17 @@ public class PropriedadeServiceImpl implements PropriedadeService {
             propriedade.getEndereco().setEstado(dto.endereco().estado());
         }
 
+        log.info("Propriedade atualizada com sucesso. ID: {}", propriedade.getId());
         return propriedade;
     }
 
-    @Transactional
     public void deletar(Long id) {
+        log.info("Deletando propriedade ID: {}", id);
         if (!propriedadeRepository.existsById(id)) {
-            throw new ResourceNotFoundException(NOT_FOUND_MSG + id);
+            throw new RuntimeException("Propriedade não encontrada com ID: " + id);
         }
         propriedadeRepository.deleteById(id);
+        log.info("Propriedade deletada com sucesso. ID: {}", id);
     }
 
 }
