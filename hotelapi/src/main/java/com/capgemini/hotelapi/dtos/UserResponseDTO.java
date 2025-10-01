@@ -19,6 +19,4 @@ public class UserResponseDTO {
     private String telefone;
     private LocalDate dataNascimento;
     private String endereco;
-    private LocalDateTime dataCriacao;
-    private LocalDateTime dataAtualizacao;
 }

@@ -38,7 +38,7 @@ public class ReservaController {
     @PostMapping
     public ResponseEntity<ReservaResponseDTO> createReserva(@Valid @RequestBody ReservaRequestDTO dto) {
         log.info("Recebida requisição para criar nova reserva");
-        ReservaResponseDTO reserva = reservaService.create(dto);
+        ReservaResponseDTO reserva = reservaService.createReserva(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(reserva);
     }
 
@@ -64,42 +64,6 @@ public class ReservaController {
         return ResponseEntity.ok(reservaService.buscarPorId(id));
     }
 
-    @Operation(summary = "Confirmar reserva", description = "Confirma uma reserva pendente")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Reserva confirmada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Reserva não encontrada")
-    })
-    @PutMapping("/{id}/confirmar")
-    public ResponseEntity<ReservaResponseDTO> confirmarReserva(
-            @Parameter(description = "ID da reserva") @PathVariable Long id) {
-        log.info("Recebida requisição para confirmar reserva com ID: {}", id);
-        return ResponseEntity.ok(reservaService.confirmar(id));
-    }
-
-    @Operation(summary = "Cancelar reserva", description = "Cancela uma reserva")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Reserva cancelada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Reserva não encontrada")
-    })
-    @PutMapping("/{id}/cancelar")
-    public ResponseEntity<ReservaResponseDTO> cancelarReserva(
-            @Parameter(description = "ID da reserva") @PathVariable Long id) {
-        log.info("Recebida requisição para cancelar reserva com ID: {}", id);
-        return ResponseEntity.ok(reservaService.cancelar(id));
-    }
-
-    @Operation(summary = "Finalizar reserva", description = "Finaliza uma reserva confirmada")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Reserva finalizada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Reserva não encontrada")
-    })
-    @PutMapping("/{id}/finalizar")
-    public ResponseEntity<ReservaResponseDTO> finalizarReserva(
-            @Parameter(description = "ID da reserva") @PathVariable Long id) {
-        log.info("Recebida requisição para finalizar reserva com ID: {}", id);
-        return ResponseEntity.ok(reservaService.finalizar(id));
-    }
-
     @Operation(summary = "Atualizar reserva", description = "Atualiza os dados de uma reserva existente")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Reserva atualizada com sucesso"),
@@ -111,6 +75,42 @@ public class ReservaController {
             @Parameter(description = "ID da reserva") @PathVariable Long id,
             @Valid @RequestBody ReservaUpdateDTO dto) {
         log.info("Recebida requisição para atualizar reserva com ID: {}", id);
-        return ResponseEntity.ok(reservaService.update(id, dto));
+        return ResponseEntity.ok(reservaService.updateReserva(id, dto));
     }
+
+//    @Operation(summary = "Confirmar reserva", description = "Confirma uma reserva pendente")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Reserva confirmada com sucesso"),
+//            @ApiResponse(responseCode = "404", description = "Reserva não encontrada")
+//    })
+//    @PutMapping("/{id}/confirmar")
+//    public ResponseEntity<ReservaResponseDTO> confirmarReserva(
+//            @Parameter(description = "ID da reserva") @PathVariable Long id) {
+//        log.info("Recebida requisição para confirmar reserva com ID: {}", id);
+//        return ResponseEntity.ok(reservaService.confirmar(id));
+//    }
+
+//    @Operation(summary = "Cancelar reserva", description = "Cancela uma reserva")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Reserva cancelada com sucesso"),
+//            @ApiResponse(responseCode = "404", description = "Reserva não encontrada")
+//    })
+//    @PutMapping("/{id}/cancelar")
+//    public ResponseEntity<ReservaResponseDTO> cancelarReserva(
+//            @Parameter(description = "ID da reserva") @PathVariable Long id) {
+//        log.info("Recebida requisição para cancelar reserva com ID: {}", id);
+//        return ResponseEntity.ok(reservaService.cancelar(id));
+//    }
+//
+//    @Operation(summary = "Finalizar reserva", description = "Finaliza uma reserva confirmada")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Reserva finalizada com sucesso"),
+//            @ApiResponse(responseCode = "404", description = "Reserva não encontrada")
+//    })
+//    @PutMapping("/{id}/finalizar")
+//    public ResponseEntity<ReservaResponseDTO> finalizarReserva(
+//            @Parameter(description = "ID da reserva") @PathVariable Long id) {
+//        log.info("Recebida requisição para finalizar reserva com ID: {}", id);
+//        return ResponseEntity.ok(reservaService.finalizar(id));
+//    }
 }

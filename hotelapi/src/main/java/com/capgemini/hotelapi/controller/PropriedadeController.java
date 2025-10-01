@@ -2,8 +2,10 @@ package com.capgemini.hotelapi.controller;
 
 import com.capgemini.hotelapi.dtos.PropriedadeRequestDTO;
 import com.capgemini.hotelapi.dtos.PropriedadeResponseDTO;
+import com.capgemini.hotelapi.dtos.ReservaResponseDTO;
 import com.capgemini.hotelapi.model.Propriedade;
 import com.capgemini.hotelapi.service.PropriedadeService;
+import com.capgemini.hotelapi.service.ReservaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -27,6 +29,7 @@ import java.util.List;
 public class PropriedadeController {
 
     private final PropriedadeService propriedadeService;
+    private final ReservaService reservaService;
 
     @Operation(summary = "Criar nova propriedade")
     @PostMapping
@@ -63,5 +66,12 @@ public class PropriedadeController {
     public ResponseEntity<Void> deletePropriedade(@PathVariable Long id) {
         propriedadeService.deletePropriedade(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Buscar reservas de uma propriedade por ID")
+    @GetMapping("/{id}/reservas")
+    public ResponseEntity<List<ReservaResponseDTO>> getReservasByPropriedadeId(@PathVariable Long id) {
+        List<ReservaResponseDTO> reservas = reservaService.getReservasByPropriedadeId(id);
+        return ResponseEntity.ok(reservas);
     }
 }

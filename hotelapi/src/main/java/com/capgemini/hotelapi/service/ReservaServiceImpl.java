@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +31,7 @@ public class ReservaServiceImpl implements ReservaService {
     private final QuartoRepository quartoRepository;
 
     @Override
-    public ReservaResponseDTO create(ReservaRequestDTO dto) {
+    public ReservaResponseDTO createReserva(ReservaRequestDTO dto) {
         log.info("Criando nova reserva para usuário ID: {} e quarto ID: {}", dto.userId(), dto.quartoId());
         
         User user = userRepository.findById(dto.userId())
@@ -48,7 +49,7 @@ public class ReservaServiceImpl implements ReservaService {
             throw new RuntimeException("Datas inválidas para reserva.");
         }
 
-        double valorTotal = dias * 100.0; // TODO: Implementar campo valorDiaria na entidade Quarto
+        double valorTotal = dias * quarto.getValorDiaria();
 
         Reserva reserva = Reserva.builder()
                 .user(user)
@@ -66,17 +67,17 @@ public class ReservaServiceImpl implements ReservaService {
     }
 
     @Override
-    public ReservaResponseDTO update(Long id, ReservaUpdateDTO dto) {
+    public ReservaResponseDTO updateReserva(Long id, ReservaUpdateDTO dto) {
         log.info("Atualizando reserva ID: {}", id);
-        Reserva reserva = findReserva(id);
+        Reserva reserva = getReservaById(id);
+        Optional<Quarto> quarto = quartoRepository.findById(reserva.getQuarto().getId());
 
         long dias = ChronoUnit.DAYS.between(dto.checkIn(), dto.checkOut());
         if (dias <= 0) {
             throw new RuntimeException("Datas inválidas para reserva.");
         }
 
-        // pra recalcular precisa juliana add o valor da diaria
-        double novoValorTotal = dias * 100.0; // TODO: Implementar campo valorDiaria na entidade Quarto
+        double novoValorTotal = dias * quarto.get().getValorDiaria();
 
         reserva.setCheckIn(dto.checkIn());
         reserva.setCheckOut(dto.checkOut());
@@ -85,11 +86,21 @@ public class ReservaServiceImpl implements ReservaService {
         return toResponse(reservaRepository.save(reserva));
     }
 
-    //Discutir se poderia ter essas confirmações de reserva - nao foi incluido no trade off
+    @Override
+    public List<ReservaResponseDTO> getReservasByPropriedadeId(Long propriedadeId) {
+        List<Quarto> quartos = quartoRepository.findByPropriedadeId(propriedadeId);
+
+        List<Reserva> reservas = quartos.stream()
+                .flatMap(quarto -> reservaRepository.findByQuartoId(quarto.getId()).stream())
+                .toList();
+
+        return reservas.stream().map(this::toResponse).toList();
+    }
+
     @Override
     public ReservaResponseDTO confirmar(Long id) {
         log.info("Confirmando reserva ID: {}", id);
-        Reserva reserva = findReserva(id);
+        Reserva reserva = getReservaById(id);
         reserva.setStatus(ReservaStatus.CONFIRMADA);
         return toResponse(reservaRepository.save(reserva));
     }
@@ -97,7 +108,7 @@ public class ReservaServiceImpl implements ReservaService {
     @Override
     public ReservaResponseDTO cancelar(Long id) {
         log.info("Cancelando reserva ID: {}", id);
-        Reserva reserva = findReserva(id);
+        Reserva reserva = getReservaById(id);
         reserva.setStatus(ReservaStatus.CANCELADA);
 
         Quarto quarto = reserva.getQuarto();
@@ -110,7 +121,7 @@ public class ReservaServiceImpl implements ReservaService {
     @Override
     public ReservaResponseDTO finalizar(Long id) {
         log.info("Finalizando reserva ID: {}", id);
-        Reserva reserva = findReserva(id);
+        Reserva reserva = getReservaById(id);
         reserva.setStatus(ReservaStatus.FINALIZADA);
 
         Quarto quarto = reserva.getQuarto();
@@ -124,7 +135,7 @@ public class ReservaServiceImpl implements ReservaService {
     @Transactional(readOnly = true)
     public ReservaResponseDTO buscarPorId(Long id) {
         log.info("Buscando reserva por ID: {}", id);
-        return toResponse(findReserva(id));
+        return toResponse(getReservaById(id));
     }
 
     @Override
@@ -136,7 +147,7 @@ public class ReservaServiceImpl implements ReservaService {
                 .toList();
     }
 
-    private Reserva findReserva(Long id) {
+    private Reserva getReservaById(Long id) {
         return reservaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva não encontrada com ID: " + id));
     }
