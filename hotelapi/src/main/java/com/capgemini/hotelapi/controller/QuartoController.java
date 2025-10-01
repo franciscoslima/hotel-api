@@ -1,65 +1,63 @@
 package com.capgemini.hotelapi.controller;
 
-
-import com.capgemini.hotelapi.dtos.QuartoDto;
-import com.capgemini.hotelapi.model.Quarto;
+import com.capgemini.hotelapi.dtos.QuartoRequestDTO;
+import com.capgemini.hotelapi.dtos.QuartoResponseDTO;
 import com.capgemini.hotelapi.service.QuartoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("api/quarto")
+@RequestMapping("/api/quartos")
+@RequiredArgsConstructor
+@Slf4j
+@Tag(name = "Quartos", description = "API para gerenciamento de quartos")
 public class QuartoController {
+
     private final QuartoService quartoService;
 
-    public QuartoController(QuartoService quartoService) {
-        this.quartoService = quartoService;
-    }
-
-    @GetMapping
-    public List<Quarto> listarTodos(){
-        return quartoService.getAll();
-    }
-
-    @GetMapping("/{id}")
-    public Quarto obterPorId(Long id){
-        return quartoService.findById(id);
-    }
-
+    @Operation(summary = "Criar novo quarto (vinculando a uma Propriedade ID)")
     @PostMapping
-    public Quarto cadastrar(@RequestBody @Valid Quarto quarto) {
-        return quartoService.create(quarto);
+    public ResponseEntity<QuartoResponseDTO> createQuarto(@Valid @RequestBody QuartoRequestDTO quarto) {
+        QuartoResponseDTO createdQuarto = quartoService.create(quarto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdQuarto);
     }
 
-    @PostMapping("/{id}")
-    public Quarto atualizar(@PathVariable Long id, @RequestBody @Valid QuartoDto quarto) {
-        return quartoService.update(quarto, id);
+    @Operation(summary = "Listar todos os quartos")
+    @GetMapping
+    public ResponseEntity<List<QuartoResponseDTO>> getAllQuartos() {
+        List<QuartoResponseDTO> quartos = quartoService.getAll();
+        return ResponseEntity.ok(quartos);
     }
 
+    @Operation(summary = "Buscar quarto por ID")
+    @GetMapping("/{id}")
+    public ResponseEntity<QuartoResponseDTO> getQuartoById(@PathVariable Long id) {
+        QuartoResponseDTO quarto = quartoService.findById(id);
+        return ResponseEntity.ok(quarto);
+    }
+
+    @Operation(summary = "Atualizar quarto")
+    @PutMapping("/{id}")
+    public ResponseEntity<QuartoResponseDTO> updateQuarto(
+            @PathVariable Long id,
+            @Valid @RequestBody QuartoRequestDTO quarto) {
+
+        QuartoResponseDTO updatedQuarto = quartoService.update(id, quarto);
+        return ResponseEntity.ok(updatedQuarto);
+    }
+
+    @Operation(summary = "Deletar quarto")
     @DeleteMapping("/{id}")
-    public void deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteQuarto(@PathVariable Long id) {
         quartoService.delete(id);
-    }
-
-    @PutMapping("/{id}/reservar")
-    public Quarto reservar(@PathVariable Long id){
-        return quartoService.reservarQuarto(id);
-    }
-
-    @PutMapping("/{id}/checkin")
-    public Quarto checkin(@PathVariable Long id){
-        return quartoService.checkin(id);
-    }
-
-    @PutMapping("/{id}/realizarManutencao")
-    public Quarto manutencao(@PathVariable Long id){
-        return quartoService.manutencao(id);
-    }
-
-    @PutMapping("/{id}/cancelarResereva")
-    public Quarto cancelarResereva(@PathVariable Long id){
-        return quartoService.cancelarResereva(id);
+        return ResponseEntity.noContent().build();
     }
 }

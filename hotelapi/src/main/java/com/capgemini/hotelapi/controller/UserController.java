@@ -1,7 +1,7 @@
 package com.capgemini.hotelapi.controller;
 
-import com.capgemini.hotelapi.dto.UserRequestDTO;
-import com.capgemini.hotelapi.dto.UserResponseDTO;
+import com.capgemini.hotelapi.dtos.UserRequestDTO;
+import com.capgemini.hotelapi.dtos.UserResponseDTO;
 import com.capgemini.hotelapi.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +21,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Usuários", description = "API para gerenciamento de usuários/hóspedes")
 public class UserController {
 
-    private final UserService userService;
+    @Autowired
+    private UserService userService;
 
     @Operation(summary = "Criar novo usuário", description = "Cria um novo usuário/hóspede no sistema")
     @ApiResponses(value = {

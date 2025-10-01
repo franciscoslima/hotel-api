@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidRoomStatusException.class)
-    public ResponseEntity<?> handlerInvalidRoomStatus(InvalidRoomStatusException ex){
+    public ResponseEntity<Map<String, String>> handlerInvalidRoomStatus(InvalidRoomStatusException ex){
         Map<String, String> body = new HashMap<>();
         body.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);

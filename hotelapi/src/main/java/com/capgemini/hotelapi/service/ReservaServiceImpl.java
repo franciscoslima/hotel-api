@@ -1,18 +1,28 @@
 package com.capgemini.hotelapi.service;
 
+import com.capgemini.hotelapi.dtos.ReservaRequestDTO;
+import com.capgemini.hotelapi.dtos.ReservaResponseDTO;
+import com.capgemini.hotelapi.dtos.ReservaUpdateDTO;
+import com.capgemini.hotelapi.model.Quarto;
+import com.capgemini.hotelapi.model.QuartoStatus;
 import com.capgemini.hotelapi.model.Reserva;
 import com.capgemini.hotelapi.model.ReservaStatus;
+import com.capgemini.hotelapi.model.User;
+import com.capgemini.hotelapi.repository.QuartoRepository;
 import com.capgemini.hotelapi.repository.ReservaRepository;
-import jakarta.transaction.Transactional;
+import com.capgemini.hotelapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
+@Slf4j
+@Transactional
 public class ReservaServiceImpl implements ReservaService {
 
     private final ReservaRepository reservaRepository;
@@ -21,13 +31,15 @@ public class ReservaServiceImpl implements ReservaService {
 
     @Override
     public ReservaResponseDTO create(ReservaRequestDTO dto) {
+        log.info("Criando nova reserva para usuário ID: {} e quarto ID: {}", dto.userId(), dto.quartoId());
+        
         User user = userRepository.findById(dto.userId())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + dto.userId()));
 
         Quarto quarto = quartoRepository.findById(dto.quartoId())
-                .orElseThrow(() -> new RuntimeException("Quarto não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Quarto não encontrado com ID: " + dto.quartoId()));
 
-        if (quarto.getStatus() != QuartoStatusEnum.DISPONIVEL) {
+        if (quarto.getStatus() != QuartoStatus.DISPONIVEL) {
             throw new RuntimeException("Quarto não está disponível para reserva.");
         }
 
@@ -36,7 +48,7 @@ public class ReservaServiceImpl implements ReservaService {
             throw new RuntimeException("Datas inválidas para reserva.");
         }
 
-        double valorTotal = dias * quarto.getValorDiaria();
+        double valorTotal = dias * 100.0; // TODO: Implementar campo valorDiaria na entidade Quarto
 
         Reserva reserva = Reserva.builder()
                 .user(user)
@@ -47,7 +59,7 @@ public class ReservaServiceImpl implements ReservaService {
                 .valorTotal(valorTotal)
                 .build();
 
-        quarto.setStatus(QuartoStatusEnum.RESERVADO);
+        quarto.setStatus(QuartoStatus.RESERVADO);
         quartoRepository.save(quarto);
 
         return toResponse(reservaRepository.save(reserva));
@@ -55,6 +67,7 @@ public class ReservaServiceImpl implements ReservaService {
 
     @Override
     public ReservaResponseDTO update(Long id, ReservaUpdateDTO dto) {
+        log.info("Atualizando reserva ID: {}", id);
         Reserva reserva = findReserva(id);
 
         long dias = ChronoUnit.DAYS.between(dto.checkIn(), dto.checkOut());
@@ -63,7 +76,7 @@ public class ReservaServiceImpl implements ReservaService {
         }
 
         // pra recalcular precisa juliana add o valor da diaria
-        double novoValorTotal = dias * reserva.getQuarto().getValorDiaria();
+        double novoValorTotal = dias * 100.0; // TODO: Implementar campo valorDiaria na entidade Quarto
 
         reserva.setCheckIn(dto.checkIn());
         reserva.setCheckOut(dto.checkOut());
@@ -75,6 +88,7 @@ public class ReservaServiceImpl implements ReservaService {
     //Discutir se poderia ter essas confirmações de reserva - nao foi incluido no trade off
     @Override
     public ReservaResponseDTO confirmar(Long id) {
+        log.info("Confirmando reserva ID: {}", id);
         Reserva reserva = findReserva(id);
         reserva.setStatus(ReservaStatus.CONFIRMADA);
         return toResponse(reservaRepository.save(reserva));
@@ -82,11 +96,12 @@ public class ReservaServiceImpl implements ReservaService {
 
     @Override
     public ReservaResponseDTO cancelar(Long id) {
+        log.info("Cancelando reserva ID: {}", id);
         Reserva reserva = findReserva(id);
         reserva.setStatus(ReservaStatus.CANCELADA);
 
         Quarto quarto = reserva.getQuarto();
-        quarto.setStatus(QuartoStatusEnum.DISPONIVEL);
+        quarto.setStatus(QuartoStatus.DISPONIVEL);
         quartoRepository.save(quarto);
 
         return toResponse(reservaRepository.save(reserva));
@@ -94,25 +109,29 @@ public class ReservaServiceImpl implements ReservaService {
 
     @Override
     public ReservaResponseDTO finalizar(Long id) {
+        log.info("Finalizando reserva ID: {}", id);
         Reserva reserva = findReserva(id);
         reserva.setStatus(ReservaStatus.FINALIZADA);
 
         Quarto quarto = reserva.getQuarto();
-        quarto.setStatus(QuartoStatusEnum.MANUTENCAO);
+        quarto.setStatus(QuartoStatus.MANUTENCAO);
         quartoRepository.save(quarto);
 
         return toResponse(reservaRepository.save(reserva));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ReservaResponseDTO buscarPorId(Long id) {
+        log.info("Buscando reserva por ID: {}", id);
         return toResponse(findReserva(id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ReservaResponseDTO> listarTodas() {
-        return reservaRepository.findAll()
-                .stream()
+        log.info("Listando todas as reservas");
+        return reservaRepository.findAll().stream()
                 .map(this::toResponse)
                 .toList();
     }

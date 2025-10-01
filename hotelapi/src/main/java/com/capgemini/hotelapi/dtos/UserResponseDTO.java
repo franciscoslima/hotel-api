@@ -1,4 +1,4 @@
-package com.capgemini.hotelapi.dto;
+package com.capgemini.hotelapi.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
