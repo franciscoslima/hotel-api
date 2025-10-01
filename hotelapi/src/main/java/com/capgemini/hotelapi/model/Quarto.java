@@ -3,6 +3,8 @@ package com.capgemini.hotelapi.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "quartos")
 @Data
@@ -28,6 +30,9 @@ public class Quarto {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "propriedade_id", nullable = false)
     private Propriedade propriedade;
+
+    @OneToMany(mappedBy = "quarto")
+    private List<Reserva> reservas;
 
     private Double valorDiaria;
 }
