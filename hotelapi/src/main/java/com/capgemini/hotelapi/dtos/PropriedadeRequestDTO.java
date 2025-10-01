@@ -19,7 +19,6 @@ public record PropriedadeRequestDTO(
         @NotNull(message = "O tipo é obrigatório")
         TipoPropriedade tipo,
 
-        @Schema(description = "Endereço da propriedade", example = "Rua da Paz, 321, Centro, Recife, PE")
         @NotNull(message = "O endereço é obrigatório")
         EnderecoRequestDTO endereco
 ) {}
