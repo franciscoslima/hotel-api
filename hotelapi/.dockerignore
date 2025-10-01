@@ -1,0 +1,17 @@
+# Diretórios e arquivos a serem ignorados no build do Docker
+target/
+.git/
+.idea/
+*.iml
+*.log
+.mvn/wrapper/maven-wrapper.jar
+.DS_Store
+Thumbs.db
+
+# Arquivos temporários
+*.tmp
+*.temp
+*~
+
+# Arquivos de configuração local
+application-local.properties
