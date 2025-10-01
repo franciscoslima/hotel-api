@@ -1,5 +1,8 @@
 package com.capgemini.hotelapi.service;
 
+import com.capgemini.hotelapi.dtos.PropriedadeResponseDTO;
+import com.capgemini.hotelapi.dtos.QuartoRequestDTO;
+import com.capgemini.hotelapi.dtos.QuartoResponseDTO;
 import com.capgemini.hotelapi.exceptions.InvalidRoomStatusException;
 import com.capgemini.hotelapi.model.Quarto;
 import com.capgemini.hotelapi.model.QuartoStatus;
@@ -10,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,113 +22,78 @@ import java.util.List;
 public class QuartoServiceImpl implements QuartoService {
 
     private final QuartoRepository quartoRepository;
+    private final PropriedadeService propriedadeService;
 
     @Transactional(readOnly = true)
-    public List<Quarto> getAll() {
+    public List<QuartoResponseDTO> getAll() {
         log.info("Listando todos os quartos");
-        return quartoRepository.findAll();
+        return quartoRepository.findAll().stream().map(this::fromEntity).toList();
     }
 
     @Transactional(readOnly = true)
-    public Quarto findById(Long id) {
+    public QuartoResponseDTO findById(Long id) {
         log.info("Buscando quarto por ID: {}", id);
-        return quartoRepository.findById(id)
+        return quartoRepository.findById(id).map(this::fromEntity)
                 .orElseThrow(() -> new RuntimeException("Quarto não encontrado com ID: " + id));
     }
 
-    public Quarto create(Quarto quarto) {
+    public QuartoResponseDTO create(QuartoRequestDTO quarto) {
+        PropriedadeResponseDTO propriedade = propriedadeService.getPropriedadeById(quarto.propriedadeId());
         log.info("Criando novo quarto");
-        Quarto savedQuarto = quartoRepository.save(quarto);
+
+        Quarto quartoToSave = toEntity(quarto);
+        quartoToSave.setPropriedade(propriedadeService.fromResponseDTO(propriedade));
+
+        Quarto savedQuarto = quartoRepository.save(quartoToSave);
         log.info("Quarto criado com sucesso. ID: {}", savedQuarto.getId());
-        return savedQuarto;
+        return fromEntity(savedQuarto);
     }
 
-    public Quarto update(Quarto quarto, Long id) {
+    public QuartoResponseDTO update(QuartoRequestDTO quarto, Long id) {
         log.info("Atualizando quarto ID: {}", id);
-        Quarto existingQuarto = this.findById(id);
-        quarto.setId(id);
-        Quarto updatedQuarto = quartoRepository.save(quarto);
+        Optional<Quarto> existingQuarto = quartoRepository.findById(id);
+
+        if (existingQuarto.isEmpty()) {
+            throw new RuntimeException("Quarto não encontrado com ID: " + id);
+        }
+        existingQuarto.get().setNumeracao(quarto.numeracao());
+        existingQuarto.get().setDescricao(quarto.descricao());
+        existingQuarto.get().setStatus(quarto.status());
+        existingQuarto.get().setValorDiaria(quarto.valorDiaria());
+
+        Quarto updatedQuarto = quartoRepository.save(existingQuarto.get());
         log.info("Quarto atualizado com sucesso. ID: {}", updatedQuarto.getId());
-        return updatedQuarto;
+        return fromEntity(updatedQuarto);
     }
 
     public void delete(Long id) {
         log.info("Deletando quarto ID: {}", id);
 
-        //verifica se quarto existe
         this.findById(id);
 
         quartoRepository.deleteById(id);
         log.info("Quarto deletado com sucesso. ID: {}", id);
     }
 
-    public Quarto reservarQuarto(Long id) {
-        log.info("Reservando quarto ID: {}", id);
-        Quarto quarto = this.findById(id);
-
-        if (quarto.getStatus() != QuartoStatus.DISPONIVEL) {
-            throw new InvalidRoomStatusException("Quarto não está disponível para reserva.");
-        }
-
-        quarto.setStatus(QuartoStatus.RESERVADO);
-        Quarto quartoReservado = quartoRepository.save(quarto);
-        log.info("Quarto reservado com sucesso. ID: {}", quartoReservado.getId());
-        return quartoReservado;
+    public QuartoResponseDTO fromEntity(Quarto quarto) {
+        return new QuartoResponseDTO(
+                quarto.getId(),
+                quarto.getNumeracao(),
+                quarto.getDescricao(),
+                quarto.getValorDiaria(),
+                quarto.getStatus(),
+                quarto.getPropriedade().getNome()
+        );
     }
 
-    public Quarto checkin(Long id) {
-        log.info("Realizando check-in do quarto ID: {}", id);
-        Quarto quarto = this.findById(id);
-
-        if (quarto.getStatus() != QuartoStatus.RESERVADO) {
-            throw new InvalidRoomStatusException("Este quarto não possui reservas.");
-        }
-
-        quarto.setStatus(QuartoStatus.OCUPADO);
-        Quarto quartoOcupado = quartoRepository.save(quarto);
-        log.info("Check-in realizado com sucesso. ID: {}", quartoOcupado.getId());
-        return quartoOcupado;
-    }
-
-    public Quarto checkout(Long id) {
-        log.info("Realizando check-out do quarto ID: {}", id);
-        Quarto quarto = this.findById(id);
-
-        if (quarto.getStatus() != QuartoStatus.OCUPADO) {
-            throw new InvalidRoomStatusException("Operação inválida.");
-        }
-
-        quarto.setStatus(QuartoStatus.MANUTENCAO);
-        Quarto quartoManutencao = quartoRepository.save(quarto);
-        log.info("Check-out realizado com sucesso. ID: {}", quartoManutencao.getId());
-        return quartoManutencao;
-    }
-
-    public Quarto manutencao(Long id) {
-        log.info("Marcando quarto para manutenção ID: {}", id);
-        Quarto quarto = this.findById(id);
-
-        if (quarto.getStatus() == QuartoStatus.OCUPADO || quarto.getStatus() == QuartoStatus.RESERVADO) {
-            throw new InvalidRoomStatusException("Operação inválida. Quarto está ocupado ou reservado.");
-        }
-
-        quarto.setStatus(QuartoStatus.MANUTENCAO);
-        Quarto quartoManutencao = quartoRepository.save(quarto);
-        log.info("Quarto marcado para manutenção com sucesso. ID: {}", quartoManutencao.getId());
-        return quartoManutencao;
-    }
-
-    public Quarto cancelarResereva(Long id) {
-        log.info("Cancelando reserva do quarto ID: {}", id);
-        Quarto quarto = this.findById(id);
-
-        if (quarto.getStatus() != QuartoStatus.RESERVADO) {
-            throw new InvalidRoomStatusException("Quarto não está reservado.");
-        }
-
-        quarto.setStatus(QuartoStatus.DISPONIVEL);
-        Quarto quartoDisponivel = quartoRepository.save(quarto);
-        log.info("Reserva cancelada com sucesso. ID: {}", quartoDisponivel.getId());
-        return quartoDisponivel;
+    public Quarto toEntity(QuartoRequestDTO dto) {
+        return new Quarto(
+                null,
+                dto.numeracao(),
+                dto.descricao(),
+                dto.status(),
+                null,
+                dto.valorDiaria()
+        );
     }
 }

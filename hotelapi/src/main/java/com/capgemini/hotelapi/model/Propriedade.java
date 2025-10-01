@@ -1,16 +1,19 @@
 package com.capgemini.hotelapi.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "properties")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = "quartos")
+@EqualsAndHashCode(exclude = "quartos")
 public class Propriedade {
 
     @Id
@@ -32,8 +35,16 @@ public class Propriedade {
     @OneToMany(mappedBy = "propriedade", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Quarto> quartos = new ArrayList<>();
 
-//    public void adicionarQuarto(Quarto quarto) {
-//        this.quartos.add(quarto);
-//        quarto.setPropriedade(this);
-//    }
+    public void adicionarQuarto(Quarto quarto) {
+        if (this.quartos == null) {
+            this.quartos = new ArrayList<>();
+        }
+        this.quartos.add(quarto);
+        quarto.setPropriedade(this);
+    }
+
+    public void removerQuarto(Quarto quarto) {
+        this.quartos.remove(quarto);
+        quarto.setPropriedade(null);
+    }
 }

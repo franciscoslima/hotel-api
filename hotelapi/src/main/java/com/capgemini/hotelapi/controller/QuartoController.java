@@ -1,5 +1,7 @@
 package com.capgemini.hotelapi.controller;
 
+import com.capgemini.hotelapi.dtos.QuartoRequestDTO;
+import com.capgemini.hotelapi.dtos.QuartoResponseDTO;
 import com.capgemini.hotelapi.model.Quarto;
 import com.capgemini.hotelapi.service.QuartoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,9 +34,9 @@ public class QuartoController {
             @ApiResponse(responseCode = "200", description = "Lista de quartos retornada com sucesso")
     })
     @GetMapping
-    public ResponseEntity<List<Quarto>> getAllQuartos() {
+    public ResponseEntity<List<QuartoResponseDTO>> getAllQuartos() {
         log.info("Recebida requisição para listar todos os quartos");
-        List<Quarto> quartos = quartoService.getAll();
+        List<QuartoResponseDTO> quartos = quartoService.getAll();
         return ResponseEntity.ok(quartos);
     }
 
@@ -44,10 +46,10 @@ public class QuartoController {
             @ApiResponse(responseCode = "404", description = "Quarto não encontrado")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Quarto> getQuartoById(
+    public ResponseEntity<QuartoResponseDTO> getQuartoById(
             @Parameter(description = "ID do quarto") @PathVariable Long id) {
         log.info("Recebida requisição para buscar quarto com ID: {}", id);
-        Quarto quarto = quartoService.findById(id);
+        QuartoResponseDTO quarto = quartoService.findById(id);
         return ResponseEntity.ok(quarto);
     }
 
@@ -57,9 +59,9 @@ public class QuartoController {
             @ApiResponse(responseCode = "400", description = "Dados inválidos")
     })
     @PostMapping
-    public ResponseEntity<Quarto> createQuarto(@Valid @RequestBody Quarto quarto) {
+    public ResponseEntity<QuartoResponseDTO> createQuarto(@Valid @RequestBody QuartoRequestDTO quarto) {
         log.info("Recebida requisição para criar novo quarto");
-        Quarto createdQuarto = quartoService.create(quarto);
+        QuartoResponseDTO createdQuarto = quartoService.create(quarto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdQuarto);
     }
 
@@ -70,11 +72,11 @@ public class QuartoController {
             @ApiResponse(responseCode = "404", description = "Quarto não encontrado")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<Quarto> updateQuarto(
+    public ResponseEntity<QuartoResponseDTO> updateQuarto(
             @Parameter(description = "ID do quarto") @PathVariable Long id,
-            @Valid @RequestBody Quarto quarto) {
+            @Valid @RequestBody QuartoRequestDTO quarto) {
         log.info("Recebida requisição para atualizar quarto com ID: {}", id);
-        Quarto updatedQuarto = quartoService.update(quarto, id);
+        QuartoResponseDTO updatedQuarto = quartoService.update(quarto, id);
         return ResponseEntity.ok(updatedQuarto);
     }
 

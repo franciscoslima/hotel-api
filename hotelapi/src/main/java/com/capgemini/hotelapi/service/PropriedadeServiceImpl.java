@@ -21,75 +21,30 @@ import java.util.List;
 public class PropriedadeServiceImpl implements PropriedadeService {
 
     private final PropriedadeRepository propriedadeRepository;
-
-    private Propriedade toEntity(PropriedadeRequestDTO dto) {
-        Propriedade propriedade = new Propriedade();
-        propriedade.setNome(dto.nome());
-        propriedade.setDescricao(dto.descricao());
-        propriedade.setTipo(dto.tipo());
-
-        if (dto.endereco() != null) {
-            Endereco endereco = new Endereco(
-                    dto.endereco().rua(),
-                    dto.endereco().bairro(),
-                    dto.endereco().cidade(),
-                    dto.endereco().estado()
-            );
-            propriedade.setEndereco(endereco);
-        }
-
-//        if (dto.getQuartos() != null) {
-//            List<Quarto> quartos = dto.getQuartos().stream()
-//                    .map(quartoDto -> new Quarto(null, propriedade, quartoDto.getNumeracao(), quartoDto.getDescricao(), quartoDto.getStatus()))
-//                    .collect(Collectors.toList());
-//
-//            quartos.forEach(propriedade::adicionarQuarto);
-//        }
-
-        return propriedade;
-    }
-
-    private PropriedadeResponseDTO fromEntity(Propriedade propriedade) {
-        if (propriedade == null) {
-            return null;
-        }
-        return new PropriedadeResponseDTO(
-                propriedade.getId(),
-                propriedade.getNome(),
-                propriedade.getDescricao(),
-                propriedade.getTipo(),
-                propriedade.getEndereco() != null ? new EnderecoResponseDTO(
-                        propriedade.getEndereco().getRua(),
-                        propriedade.getEndereco().getBairro(),
-                        propriedade.getEndereco().getCidade(),
-                        propriedade.getEndereco().getEstado()
-                ) : null
-        );
-    }
-
+    private final QuartoService quartoService;
 
     @Transactional(readOnly = true)
-    public List<Propriedade> listarTodas() {
+    public List<PropriedadeResponseDTO> getAllPropriedades() {
         log.info("Listando todas as propriedades");
-        return propriedadeRepository.findAllByOrderByNomeAsc();
+        return propriedadeRepository.findAllByOrderByNomeAsc().stream().map(this::fromEntity).toList();
     }
 
     @Transactional(readOnly = true)
-    public Propriedade buscarPorId(Long id) {
+    public PropriedadeResponseDTO getPropriedadeById(Long id) {
         log.info("Buscando propriedade por ID: {}", id);
-        return propriedadeRepository.findById(id)
+        return propriedadeRepository.findById(id).map(this::fromEntity)
                 .orElseThrow(() -> new RuntimeException("Propriedade não encontrada com ID: " + id));
     }
 
-    public Propriedade criar(PropriedadeRequestDTO dto) {
+    public PropriedadeResponseDTO createPropriedade(PropriedadeRequestDTO dto) {
         log.info("Criando nova propriedade: {}", dto.nome());
         Propriedade novaPropriedade = toEntity(dto);
         Propriedade savedPropriedade = propriedadeRepository.save(novaPropriedade);
         log.info("Propriedade criada com sucesso. ID: {}", savedPropriedade.getId());
-        return savedPropriedade;
+        return fromEntity(savedPropriedade);
     }
 
-    public Propriedade atualizar(Long id, PropriedadeRequestDTO dto) {
+    public PropriedadeResponseDTO updatePropriedade(Long id, PropriedadeRequestDTO dto) {
         log.info("Atualizando propriedade ID: {}", id);
         Propriedade propriedade = propriedadeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Propriedade não encontrada com ID: " + id));
@@ -105,11 +60,13 @@ public class PropriedadeServiceImpl implements PropriedadeService {
             propriedade.getEndereco().setEstado(dto.endereco().estado());
         }
 
-        log.info("Propriedade atualizada com sucesso. ID: {}", propriedade.getId());
-        return propriedade;
+        PropriedadeResponseDTO propriedadeResponseDTO = fromEntity(propriedade);
+
+        log.info("Propriedade atualizada com sucesso. ID: {}", propriedadeResponseDTO.id());
+        return propriedadeResponseDTO;
     }
 
-    public void deletar(Long id) {
+    public void deletePropriedade(Long id) {
         log.info("Deletando propriedade ID: {}", id);
         if (!propriedadeRepository.existsById(id)) {
             throw new RuntimeException("Propriedade não encontrada com ID: " + id);
@@ -118,4 +75,64 @@ public class PropriedadeServiceImpl implements PropriedadeService {
         log.info("Propriedade deletada com sucesso. ID: {}", id);
     }
 
+    public Propriedade toEntity(PropriedadeRequestDTO dto) {
+        Propriedade propriedade = new Propriedade();
+        propriedade.setNome(dto.nome());
+        propriedade.setDescricao(dto.descricao());
+        propriedade.setTipo(dto.tipo());
+
+        if (dto.endereco() != null) {
+            Endereco endereco = new Endereco(
+                    dto.endereco().rua(),
+                    dto.endereco().bairro(),
+                    dto.endereco().cidade(),
+                    dto.endereco().estado()
+            );
+            propriedade.setEndereco(endereco);
+        }
+
+        return propriedade;
+    }
+
+    @Override
+    public Propriedade fromResponseDTO(PropriedadeResponseDTO propriedade) {
+        if (propriedade == null) {
+            return null;
+        }
+        return new PropriedadeResponseDTO(
+                propriedade.id(),
+                propriedade.nome(),
+                propriedade.descricao(),
+                propriedade.tipo(),
+                propriedade.endereco() != null ? new EnderecoResponseDTO(
+                        propriedade.endereco().rua(),
+                        propriedade.endereco().bairro(),
+                        propriedade.endereco().cidade(),
+                        propriedade.endereco().estado()
+                ) : null,
+                propriedade.quartos() != null ?
+                        propriedade.quartos().stream().map(quartoService::fromEntity).toList() : null
+        );
+    }
+    }
+
+    public PropriedadeResponseDTO fromEntity(Propriedade propriedade) {
+        if (propriedade == null) {
+            return null;
+        }
+        return new PropriedadeResponseDTO(
+                propriedade.getId(),
+                propriedade.getNome(),
+                propriedade.getDescricao(),
+                propriedade.getTipo(),
+                propriedade.getEndereco() != null ? new EnderecoResponseDTO(
+                        propriedade.getEndereco().getRua(),
+                        propriedade.getEndereco().getBairro(),
+                        propriedade.getEndereco().getCidade(),
+                        propriedade.getEndereco().getEstado()
+                ) : null,
+                propriedade.getQuartos() != null ?
+                        propriedade.getQuartos().stream().map(quarto -> quartoService.fromEntity(quarto)).toList() : null
+        );
+    }
 }

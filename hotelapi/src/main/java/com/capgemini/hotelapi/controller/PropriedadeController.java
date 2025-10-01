@@ -1,6 +1,7 @@
 package com.capgemini.hotelapi.controller;
 
 import com.capgemini.hotelapi.dtos.PropriedadeRequestDTO;
+import com.capgemini.hotelapi.dtos.PropriedadeResponseDTO;
 import com.capgemini.hotelapi.model.Propriedade;
 import com.capgemini.hotelapi.service.PropriedadeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,9 +35,9 @@ public class PropriedadeController {
             @ApiResponse(responseCode = "400", description = "Dados inválidos")
     })
     @PostMapping
-    public ResponseEntity<Propriedade> createPropriedade(@Valid @RequestBody PropriedadeRequestDTO request) {
+    public ResponseEntity<PropriedadeResponseDTO> createPropriedade(@Valid @RequestBody PropriedadeRequestDTO request) {
         log.info("Recebida requisição para criar nova propriedade: {}", request.nome());
-        Propriedade novaPropriedade = propriedadeService.criar(request);
+        PropriedadeResponseDTO novaPropriedade = propriedadeService.createPropriedade(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(novaPropriedade);
     }
 
@@ -45,9 +46,9 @@ public class PropriedadeController {
             @ApiResponse(responseCode = "200", description = "Lista de propriedades retornada com sucesso")
     })
     @GetMapping
-    public ResponseEntity<List<Propriedade>> getAllPropriedades() {
+    public ResponseEntity<List<PropriedadeResponseDTO>> getAllPropriedades() {
         log.info("Recebida requisição para listar todas as propriedades");
-        List<Propriedade> propriedades = propriedadeService.listarTodas();
+        List<PropriedadeResponseDTO> propriedades = propriedadeService.getAllPropriedades();
         return ResponseEntity.ok(propriedades);
     }
 
@@ -57,10 +58,10 @@ public class PropriedadeController {
             @ApiResponse(responseCode = "404", description = "Propriedade não encontrada")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Propriedade> getPropriedadeById(
+    public ResponseEntity<PropriedadeResponseDTO> getPropriedadeById(
             @Parameter(description = "ID da propriedade") @PathVariable Long id) {
         log.info("Recebida requisição para buscar propriedade com ID: {}", id);
-        Propriedade propriedade = propriedadeService.buscarPorId(id);
+        PropriedadeResponseDTO propriedade = propriedadeService.getPropriedadeById(id);
         return ResponseEntity.ok(propriedade);
     }
 
@@ -71,11 +72,11 @@ public class PropriedadeController {
             @ApiResponse(responseCode = "404", description = "Propriedade não encontrada")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<Propriedade> updatePropriedade(
+    public ResponseEntity<PropriedadeResponseDTO> updatePropriedade(
             @Parameter(description = "ID da propriedade") @PathVariable Long id,
             @Valid @RequestBody PropriedadeRequestDTO request) {
         log.info("Recebida requisição para atualizar propriedade com ID: {}", id);
-        Propriedade propriedadeAtualizada = propriedadeService.atualizar(id, request);
+        PropriedadeResponseDTO propriedadeAtualizada = propriedadeService.updatePropriedade(id, request);
         return ResponseEntity.ok(propriedadeAtualizada);
     }
 
@@ -88,7 +89,7 @@ public class PropriedadeController {
     public ResponseEntity<Void> deletePropriedade(
             @Parameter(description = "ID da propriedade") @PathVariable Long id) {
         log.info("Recebida requisição para deletar propriedade com ID: {}", id);
-        propriedadeService.deletar(id);
+        propriedadeService.deletePropriedade(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -1,19 +1,26 @@
 package com.capgemini.hotelapi.service;
 
 import com.capgemini.hotelapi.dtos.PropriedadeRequestDTO;
+import com.capgemini.hotelapi.dtos.PropriedadeResponseDTO;
 import com.capgemini.hotelapi.model.Propriedade;
 
 import java.util.List;
 
 public interface PropriedadeService {
 
-    List<Propriedade> listarTodas();
+    List<PropriedadeResponseDTO> getAllPropriedades();
 
-    Propriedade buscarPorId(Long id);
+    PropriedadeResponseDTO getPropriedadeById(Long id);
 
-    Propriedade criar(PropriedadeRequestDTO dto);
+    PropriedadeResponseDTO createPropriedade(PropriedadeRequestDTO dto);
 
-    Propriedade atualizar(Long id, PropriedadeRequestDTO dto);
+    PropriedadeResponseDTO updatePropriedade(Long id, PropriedadeRequestDTO dto);
 
-    void deletar(Long id);
+    void deletePropriedade(Long id);
+
+    PropriedadeResponseDTO fromEntity(Propriedade propriedade);
+
+    Propriedade toEntity(PropriedadeRequestDTO dto);
+
+    Propriedade fromResponseDTO(PropriedadeResponseDTO propriedade);
 }
