@@ -4,7 +4,7 @@ import com.capgemini.hotelapi.dtos.ReservaRequestDTO;
 import com.capgemini.hotelapi.dtos.ReservaResponseDTO;
 import com.capgemini.hotelapi.dtos.ReservaUpdateDTO;
 import com.capgemini.hotelapi.model.Quarto;
-import com.capgemini.hotelapi.model.QuartoStatusEnum;
+import com.capgemini.hotelapi.model.QuartoStatus;
 import com.capgemini.hotelapi.model.Reserva;
 import com.capgemini.hotelapi.model.ReservaStatus;
 import com.capgemini.hotelapi.model.User;
@@ -39,7 +39,7 @@ public class ReservaServiceImpl implements ReservaService {
         Quarto quarto = quartoRepository.findById(dto.quartoId())
                 .orElseThrow(() -> new RuntimeException("Quarto não encontrado com ID: " + dto.quartoId()));
 
-        if (quarto.getStatus() != QuartoStatusEnum.DISPONIVEL) {
+        if (quarto.getStatus() != QuartoStatus.DISPONIVEL) {
             throw new RuntimeException("Quarto não está disponível para reserva.");
         }
 
@@ -59,7 +59,7 @@ public class ReservaServiceImpl implements ReservaService {
                 .valorTotal(valorTotal)
                 .build();
 
-        quarto.setStatus(QuartoStatusEnum.RESERVADO);
+        quarto.setStatus(QuartoStatus.RESERVADO);
         quartoRepository.save(quarto);
 
         return toResponse(reservaRepository.save(reserva));
@@ -101,7 +101,7 @@ public class ReservaServiceImpl implements ReservaService {
         reserva.setStatus(ReservaStatus.CANCELADA);
 
         Quarto quarto = reserva.getQuarto();
-        quarto.setStatus(QuartoStatusEnum.DISPONIVEL);
+        quarto.setStatus(QuartoStatus.DISPONIVEL);
         quartoRepository.save(quarto);
 
         return toResponse(reservaRepository.save(reserva));
@@ -114,7 +114,7 @@ public class ReservaServiceImpl implements ReservaService {
         reserva.setStatus(ReservaStatus.FINALIZADA);
 
         Quarto quarto = reserva.getQuarto();
-        quarto.setStatus(QuartoStatusEnum.MANUTENCAO);
+        quarto.setStatus(QuartoStatus.MANUTENCAO);
         quartoRepository.save(quarto);
 
         return toResponse(reservaRepository.save(reserva));

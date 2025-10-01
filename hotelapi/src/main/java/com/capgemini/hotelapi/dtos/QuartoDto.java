@@ -1,7 +1,7 @@
 package com.capgemini.hotelapi.dtos;
 
 import com.capgemini.hotelapi.model.Propriedade;
-import com.capgemini.hotelapi.model.QuartoStatusEnum;
+import com.capgemini.hotelapi.model.QuartoStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,7 +22,7 @@ public class QuartoDto {
 
     @Schema(description = "Status do quarto", example = "DISPONIVEL")
     @NotNull(message = "Status é obrigatório")
-    private QuartoStatusEnum status = QuartoStatusEnum.DISPONIVEL;
+    private QuartoStatus status = QuartoStatus.DISPONIVEL;
 
     @Schema(description = "Propriedade associada ao quarto")
     @NotNull(message = "Propriedade é obrigatório")

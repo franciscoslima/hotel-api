@@ -24,7 +24,7 @@ public class Quarto {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private QuartoStatusEnum status = QuartoStatusEnum.DISPONIVEL;
+    private QuartoStatus status = QuartoStatus.DISPONIVEL;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "propriedade_id", nullable = false)

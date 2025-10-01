@@ -1,6 +1,6 @@
 package com.capgemini.hotelapi.model;
 
-public enum QuartoStatusEnum {
+public enum QuartoStatus {
     DISPONIVEL("Disponivel","O quarto está livre para reserva."),
     RESERVADO("","Alguém fez uma reserva, mas ainda não está hospedado."),
     OCUPADO("","O hóspede está atualmente no quarto."),
@@ -10,7 +10,7 @@ public enum QuartoStatusEnum {
     private final String nome;
     private final String descricao;
 
-    QuartoStatusEnum(String nome, String descricao) {
+    QuartoStatus(String nome, String descricao) {
         this.nome = nome;
         this.descricao = descricao;
     }
