@@ -156,9 +156,7 @@ public class UserServiceImpl implements UserService {
                 user.getCpf(),
                 user.getTelefone(),
                 user.getDataNascimento(),
-                user.getEndereco(),
-                user.getDataCriacao(),
-                user.getDataAtualizacao()
+                user.getEndereco()
         );
     }
 

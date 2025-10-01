@@ -1,5 +1,6 @@
 package com.capgemini.hotelapi.controller;
 
+import com.capgemini.hotelapi.dtos.PageResponseDTO;
 import com.capgemini.hotelapi.dtos.UserRequestDTO;
 import com.capgemini.hotelapi.dtos.UserResponseDTO;
 import com.capgemini.hotelapi.service.UserService;
@@ -61,7 +62,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Lista de usuários retornada com sucesso")
     })
     @GetMapping
-    public ResponseEntity<Page<UserResponseDTO>> getAllUsers(
+    public ResponseEntity<PageResponseDTO<UserResponseDTO>> getAllUsers(
             @Parameter(description = "Número da página") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Tamanho da página") @RequestParam(defaultValue = "10") int size,
             @Parameter(description = "Campo para ordenação") @RequestParam(defaultValue = "nome") String sortBy,
@@ -69,7 +70,7 @@ public class UserController {
         
         log.info("Recebida requisição para listar usuários - página: {}, tamanho: {}", page, size);
         Page<UserResponseDTO> users = userService.getAllUsers(page, size, sortBy, sortDirection);
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(PageResponseDTO.from(users));
     }
 
     @Operation(summary = "Listar usuários ordenados por nome")
