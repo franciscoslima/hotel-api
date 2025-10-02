@@ -38,7 +38,7 @@ API REST em Spring Boot para gerenciamento de propriedades, quartos e reservas d
 
 ### 2. Clonar o repositório
 ```bash
-git clone https://github.com/SEU_USUARIO/hotel-api.git
+git clone https://github.com/franciscoslima/hotel-api/
 cd hotel-api/hotelapi
 ```
 
@@ -51,11 +51,6 @@ docker compose up --build
 # Ou em background
 docker compose up -d --build
 ```
-Serviços criados (ver `docker-compose.yml`):
-| Serviço | Container | Porta Host | Função |
-|---------|-----------|------------|--------|
-| postgres | hotel-postgres | 5432 | Banco de dados PostgreSQL |
-| app | hotel-api | 8080 | API Spring Boot |
 
 Logs em tempo real (API):
 ```bash
@@ -80,27 +75,6 @@ docker compose down -v
 Rebuild forçando cache limpo da imagem da API:
 ```bash
 docker compose build --no-cache app
-```
-
-#### Ciclo de Desenvolvimento Rápido
-O Dockerfile faz build do JAR dentro da imagem (copy + package). Qualquer alteração em código exige rebuild. Alternativas:
-1. Desenvolver localmente com `mvn spring-boot:run` (mais rápido).
-2. Criar um `docker-compose.dev.yml` com volume apontando para o código e usar `./mvnw spring-boot:run` dentro do container.
-
-Exemplo (opcional) de `docker-compose.dev.yml`:
-```yaml
-services:
-  app:
-    volumes:
-      - ./src:/app/src
-      - ~/.m2:/root/.m2
-    command: mvn spring-boot:run
-```
-
-#### Healthcheck do Banco
-Verificar status:
-```bash
-docker inspect --format='{{json .State.Health}}' hotel-postgres | jq
 ```
 
 #### Otimização de Build
@@ -129,52 +103,121 @@ Entidades principais (simplificado):
 Diagrama (referência):
 <img width="643" height="409" alt="ERD" src="https://github.com/user-attachments/assets/026e27d7-2d52-47da-8d8f-53f3165f7f9c" />
 
-## 🔌 Endpoints Principais (Resumo)
+## 📚 Documentação da API (Swagger UI)
+
+Após subir a aplicação, a documentação interativa e a especificação OpenAPI estarão acessíveis em:
+
+* **Swagger UI**: `http://localhost:8080/swagger-ui.html`
+* **OpenAPI JSON**: `GET /api-docs`
+
+-----
+
+## 🔌 Endpoints e Exemplos
+
+### **Propriedades (`/api/propriedades`)**
 
 | Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/quartos/disponiveis?checkin=YYYY-MM-DD&checkout=YYYY-MM-DD` | Lista quartos disponíveis no período |
-| GET | `/quartos/{id}/disponivel?checkin=YYYY-MM-DD&checkout=YYYY-MM-DD` | Verifica disponibilidade de um quarto |
-| POST | `/reservas` | Cria uma reserva |
-| GET | `/reservas/{id}` | Detalha uma reserva |
-| DELETE | `/reservas/{id}` | Cancela uma reserva |
+|---|---|---|
+| POST | `/api/propriedades` | **Cria** nova propriedade. |
+| GET | `/api/propriedades` | **Lista** todas as propriedades (suporte a paginação). |
+| GET | `/api/propriedades/{id}` | **Busca** propriedade por ID. |
+| PUT | `/api/propriedades/{id}` | **Atualiza** propriedade. |
+| DELETE | `/api/propriedades/{id}` | **Deleta** propriedade. |
 
-### Exemplo de criação de reserva
-```http
-POST /reservas
-Content-Type: application/json
+**Exemplo de Payload (POST):**
 
-{
-  "quartoId": 1,
-  "dataCheckin": "2025-10-10",
-  "dataCheckout": "2025-10-15",
-  "hospedeNome": "João Silva"
-}
-```
-Resposta (exemplo):
 ```json
 {
-  "id": 42,
-  "quartoId": 1,
-  "dataCheckin": "2025-10-10",
-  "dataCheckout": "2025-10-15",
-  "status": "CONFIRMADA"
+  "nome": "Hotel Copacabana",
+  "descricao": "Hotel 5 estrelas à beira-mar",
+  "tipo": "HOTEL",
+  "endereco": {
+    "rua": "Avenida Atlântica",
+    "bairro": "Copacabana",
+    "cidade": "Rio de Janeiro",
+    "estado": "RJ"
+  }
 }
 ```
 
-## 🛡️ Boas Práticas Implementadas
-* Tratamento global de exceções (`GlobalExceptionHandler`)
-* Validação com Bean Validation
-* Uso de DTOs para entrada/saída
-* Separação por camadas (controller / service / repository / mapper)
-* Lombok para redução de boilerplate
+### **Quartos (`/api/quartos`)**
 
+| Método | Endpoint | Descrição |
+|---|---|---|
+| POST | `/api/quartos` | **Cria** novo quarto. |
+| GET | `/api/quartos` | **Lista** todos os quartos (suporte a paginação). |
+| GET | `/api/quartos/{id}` | **Busca** quarto por ID. |
+| PUT | `/api/quartos/{id}` | **Atualiza** quarto. |
+| DELETE | `/api/quartos/{id}` | **Deleta** quarto. |
+| GET | `/api/quartos/disponiveis?checkIn=...&checkOut=...` | **Lista** quartos disponíveis no período. |
+| GET | `/api/quartos/{id}/disponivel?checkIn=...&checkOut=...` | **Verifica** a disponibilidade de um quarto específico. |
 
-## 🧭 Próximos Passos (Sugestões)
-* Autenticação / Autorização (JWT)
-* Controle de concorrência em reservas (lock otimista/pessimista)
-* Auditoria (createdAt / updatedAt)
-* Testes de integração com Testcontainers
+**Exemplo de Payload (POST):**
 
+```json
+{
+  "numeracao": 101,
+  "descricao": "Quarto com vista para o mar",
+  "valorDiaria": 500.0,
+  "propriedadeId": 1,
+  "status": "DISPONIVEL"
+}
+```
 
+### **Reservas (`/api/reservas`)**
 
+| Método | Endpoint | Descrição |
+|---|---|---|
+| POST | `/api/reservas` | **Cria** nova reserva. |
+| GET | `/api/reservas` | **Lista** todas as reservas (suporte a paginação). |
+| GET | `/api/reservas/{id}` | **Busca** reserva por ID. |
+| PUT | `/api/reservas/{id}` | **Atualiza** reserva. |
+| DELETE | `/api/reservas/{id}` | **Cancela** reserva. |
+
+**Exemplo de Payload (POST):**
+
+```json
+{
+  "userId": 1,
+  "quartoId": 1,
+  "checkIn": "2025-10-10",
+  "checkOut": "2025-10-15"
+}
+```
+
+-----
+
+## 🗄️ Organização e Arquitetura
+
+O projeto segue a arquitetura em camadas padrão do Spring Boot, facilitando a separação de responsabilidades e a manutenção:
+
+```
+hotelapi/
+├── src/main/java/com/capgemini/hotelapi/
+│   ├── controller/        # Gerencia requisições HTTP (endpoints)
+│   ├── service/           # Camada de Lógica de Negócios (Business Logic)
+│   ├── repository/        # Acesso ao banco de dados (Spring Data JPA)
+│   ├── model/             # Entidades de persistência
+│   ├── dtos/              # Objetos de Transferência de Dados (Input/Output)
+│   ├── mapper/            # Conversores entre DTOs e Model
+│   └── ...
+└── ...
+```
+
+### 🛡️ Boas Práticas e Qualidade de Código
+
+* **Tratamento de Exceções**: Uso de `GlobalExceptionHandler` para respostas padronizadas.
+* **Validação**: Implementação de Bean Validation (JSR-380) nas DTOs.
+* **Padrão DTO**: Uso de DTOs para isolar a camada de *model* das requisições.
+* **Separação de Camadas**: Controle estrito da separação entre *Controller*, *Service* e *Repository*.
+
+-----
+
+## 🧭 Próximos Passos (Sugestões para Evolução)
+
+* **Segurança**: Implementação de Autenticação e Autorização via JWT.
+* **Concorrência**: Adição de controle de concorrência (ex.: *lock* otimista/pessimista) para evitar problemas de concorrência em reservas.
+* **Auditoria**: Inclusão de campos de auditoria (`createdAt` / `updatedAt`) nas entidades.
+* **Testes**: Expansão da suíte de testes de integração com **Testcontainers**.
+
+<!-- end list -->
