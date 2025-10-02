@@ -19,6 +19,6 @@ public record QuartoRequestDTO(
         @Schema(description = "Propriedade do quarto", example = "1")
         @NotNull(message = "Propriedade é obrigatória") Long propriedadeId,
 
-        @Schema(description = "Status do quarto", example = "OCUPADO")
+        @Schema(description = "Status do quarto", example = "DISPONIVEL")
         QuartoStatus status
 ) {}

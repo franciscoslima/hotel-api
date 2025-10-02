@@ -82,6 +82,7 @@ public class ReservaServiceImpl implements ReservaService {
         reserva.setCheckIn(dto.checkIn());
         reserva.setCheckOut(dto.checkOut());
         reserva.setValorTotal(novoValorTotal);
+        reserva.setStatus(dto.status());
 
         return toResponse(reservaRepository.save(reserva));
     }
