@@ -4,21 +4,21 @@ import com.capgemini.hotelapi.model.QuartoStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 public record QuartoRequestDTO(
+
         @Schema(description = "Numeração do quarto", example = "101")
-        @NotBlank(message = "Numeração é obrigatória") int numeracao,
+        @NotNull(message = "Numeração é obrigatória") int numeracao,
 
         @Schema(description = "Descrição do Quarto", example = "Quarto com vista para o mar")
         @NotBlank(message = "Descrição é obrigatória") String descricao,
 
         @Schema(description = "Valor da diária", example = "500")
-        @NotBlank(message = "Valor da diária é obrigatória") Double valorDiaria,
+        @NotNull(message = "Valor da diária é obrigatória") Double valorDiaria,
 
         @Schema(description = "Propriedade do quarto", example = "1")
-        @NotBlank(message = "Propriedade é obrigatória") Long propriedadeId,
+        @NotNull(message = "Propriedade é obrigatória") Long propriedadeId,
 
-        @Schema(description = "Status do quarto", example = "OCUPADO")
+        @Schema(description = "Status do quarto", example = "DISPONIVEL")
         QuartoStatus status
 ) {}

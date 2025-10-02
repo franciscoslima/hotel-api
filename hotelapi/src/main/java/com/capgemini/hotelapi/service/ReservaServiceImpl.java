@@ -60,7 +60,7 @@ public class ReservaServiceImpl implements ReservaService {
                 .valorTotal(valorTotal)
                 .build();
 
-        quarto.setStatus(QuartoStatus.RESERVADO);
+//        quarto.setStatus(QuartoStatus.RESERVADO);
         quartoRepository.save(quarto);
 
         return toResponse(reservaRepository.save(reserva));
@@ -82,6 +82,7 @@ public class ReservaServiceImpl implements ReservaService {
         reserva.setCheckIn(dto.checkIn());
         reserva.setCheckOut(dto.checkOut());
         reserva.setValorTotal(novoValorTotal);
+        reserva.setStatus(dto.status());
 
         return toResponse(reservaRepository.save(reserva));
     }
