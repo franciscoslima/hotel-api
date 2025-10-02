@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -85,4 +86,22 @@ public class QuartoServiceImpl implements QuartoService {
         quartoRepository.deleteById(id);
         log.info("Quarto deletado com sucesso. ID: {}", id);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<QuartoResponseDTO> findDisponiveis(LocalDate checkIn, LocalDate checkOut) {
+        log.info("Buscando quartos disponíveis entre {} e {}", checkIn, checkOut);
+        return quartoRepository.findQuartosDisponiveis(checkIn, checkOut)
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isQuartoDisponivel(Long quartoId, LocalDate checkIn, LocalDate checkOut) {
+        log.info("Verificando disponibilidade do quarto {} entre {} e {}", quartoId, checkIn, checkOut);
+        return quartoRepository.isQuartoDisponivel(quartoId, checkIn, checkOut);
+    }
+
 }
