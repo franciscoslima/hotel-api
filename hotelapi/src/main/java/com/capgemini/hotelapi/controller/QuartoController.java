@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -60,4 +61,28 @@ public class QuartoController {
         quartoService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "Listar quartos disponíveis em um período")
+    @GetMapping("/disponiveis")
+    public ResponseEntity<List<QuartoResponseDTO>> getQuartosDisponiveis(
+            @RequestParam("checkIn") String checkIn,
+            @RequestParam("checkOut") String checkOut) {
+        LocalDate checkInDate = LocalDate.parse(checkIn);
+        LocalDate checkOutDate = LocalDate.parse(checkOut);
+        List<QuartoResponseDTO> disponiveis = quartoService.findDisponiveis(checkInDate, checkOutDate);
+        return ResponseEntity.ok(disponiveis);
+    }
+
+    @Operation(summary = "Verificar se o quarto está disponível para reserva no período informado")
+    @GetMapping("/{id}/disponivel")
+    public ResponseEntity<Boolean> isQuartoDisponivel(
+            @PathVariable Long id,
+            @RequestParam("checkIn") String checkIn,
+            @RequestParam("checkOut") String checkOut) {
+        LocalDate checkInDate = LocalDate.parse(checkIn);
+        LocalDate checkOutDate = LocalDate.parse(checkOut);
+        boolean disponivel = quartoService.isQuartoDisponivel(id, checkInDate, checkOutDate);
+        return ResponseEntity.ok(disponivel);
+    }
+
 }

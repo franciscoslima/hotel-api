@@ -15,4 +15,5 @@ public interface QuartoService {
     QuartoResponseDTO update(Long id, QuartoRequestDTO dto);
     void delete(Long id);
     List<QuartoResponseDTO> findDisponiveis(LocalDate checkIn, LocalDate checkOut);
+    boolean isQuartoDisponivel(Long quartoId, LocalDate checkIn, LocalDate checkOut);
 }

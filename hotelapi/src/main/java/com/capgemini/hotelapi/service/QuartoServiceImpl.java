@@ -96,4 +96,12 @@ public class QuartoServiceImpl implements QuartoService {
                 .map(mapper::toResponseDTO)
                 .toList();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isQuartoDisponivel(Long quartoId, LocalDate checkIn, LocalDate checkOut) {
+        log.info("Verificando disponibilidade do quarto {} entre {} e {}", quartoId, checkIn, checkOut);
+        return quartoRepository.isQuartoDisponivel(quartoId, checkIn, checkOut);
+    }
+
 }
