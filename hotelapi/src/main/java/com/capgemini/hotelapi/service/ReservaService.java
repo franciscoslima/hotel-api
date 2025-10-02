@@ -16,4 +16,5 @@ public interface ReservaService {
         List<ReservaResponseDTO> listarTodas();
         ReservaResponseDTO updateReserva(Long id, ReservaUpdateDTO dto);
         List<ReservaResponseDTO> getReservasByPropriedadeId(Long id);
+        List<ReservaResponseDTO> getReservasByUserId(Long userId);
 }

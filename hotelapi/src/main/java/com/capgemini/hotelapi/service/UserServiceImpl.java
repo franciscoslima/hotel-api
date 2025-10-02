@@ -1,11 +1,14 @@
 package com.capgemini.hotelapi.service;
 
+import com.capgemini.hotelapi.dtos.ReservaResponseDTO;
 import com.capgemini.hotelapi.dtos.UserRequestDTO;
 import com.capgemini.hotelapi.dtos.UserResponseDTO;
 import com.capgemini.hotelapi.model.User;
 import com.capgemini.hotelapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +25,11 @@ import java.util.List;
 @Transactional
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ReservaService reservaService;
 
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
         log.info("Criando novo usuário com email: {}", userRequestDTO.getEmail());
@@ -167,5 +174,14 @@ public class UserServiceImpl implements UserService {
         existingUser.setTelefone(userRequestDTO.getTelefone());
         existingUser.setDataNascimento(userRequestDTO.getDataNascimento());
         existingUser.setEndereco(userRequestDTO.getEndereco());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReservaResponseDTO> getReservasByUserEmail(String email) {
+        log.info("Buscando reservas para usuário com email: {}", email);
+        
+        UserResponseDTO user = getUserByEmail(email);
+        return reservaService.getReservasByUserId(user.getId());
     }
 }
