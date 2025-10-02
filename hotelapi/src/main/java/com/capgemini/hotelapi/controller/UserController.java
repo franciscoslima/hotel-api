@@ -1,6 +1,8 @@
 package com.capgemini.hotelapi.controller;
 
+import com.capgemini.hotelapi.dtos.EmailRequestDTO;
 import com.capgemini.hotelapi.dtos.PageResponseDTO;
+import com.capgemini.hotelapi.dtos.ReservaResponseDTO;
 import com.capgemini.hotelapi.dtos.UserRequestDTO;
 import com.capgemini.hotelapi.dtos.UserResponseDTO;
 import com.capgemini.hotelapi.service.UserService;
@@ -135,5 +137,19 @@ public class UserController {
         log.info("Recebida requisição para deletar usuário com ID: {}", id);
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Buscar reservas por email do usuário", 
+               description = "Busca todas as reservas vinculadas a um usuário através do seu email")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reservas encontradas com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    })
+    @PostMapping("/reservas")
+    public ResponseEntity<List<ReservaResponseDTO>> getReservasByUserEmail(
+            @Valid @RequestBody EmailRequestDTO emailRequest) {
+        log.info("Recebida requisição para buscar reservas do usuário com email: {}", emailRequest.email());
+        List<ReservaResponseDTO> reservas = userService.getReservasByUserEmail(emailRequest.email());
+        return ResponseEntity.ok(reservas);
     }
 }

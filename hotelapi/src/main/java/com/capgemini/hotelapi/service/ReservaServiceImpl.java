@@ -147,6 +147,16 @@ public class ReservaServiceImpl implements ReservaService {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReservaResponseDTO> getReservasByUserId(Long userId) {
+        log.info("Buscando reservas para usuário ID: {}", userId);
+        return reservaRepository.findByUserId(userId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     private Reserva getReservaById(Long id) {
         return reservaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva não encontrada com ID: " + id));

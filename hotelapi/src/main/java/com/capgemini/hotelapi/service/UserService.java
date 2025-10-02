@@ -3,6 +3,7 @@ package com.capgemini.hotelapi.service;
 
 import org.springframework.data.domain.Page;
 
+import com.capgemini.hotelapi.dtos.ReservaResponseDTO;
 import com.capgemini.hotelapi.dtos.UserRequestDTO;
 import com.capgemini.hotelapi.dtos.UserResponseDTO;
 
@@ -27,4 +28,6 @@ public interface UserService {
     UserResponseDTO updateUser(Long id, UserRequestDTO userRequestDTO);
 
     void deleteUser(Long id);
+
+    List<ReservaResponseDTO> getReservasByUserEmail(String email);
 }
